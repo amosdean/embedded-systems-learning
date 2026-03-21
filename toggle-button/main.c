@@ -9,21 +9,10 @@ int main(void)
     DDRD &= ~(1 << PD5); // button input
     PORTD |= (1 << PD5); // enable pull-up
     while(1) {
-        // PORTD ^= (1 << PD7); // toggle LED
-        // _delay_ms(10000);
-        // if (!(PIND & (1 << PD5))) {
-        //     while (!(PIND & (1 << PD5))) {
-        //         PORTD ^= (1 << PD7);
-        //         printf("Button pressed\n");
-        //         _delay_ms(200);
-        //     }
-            
-        // }
         if (!(PIND & (1 << PD5))) {
-        PORTD |= (1 << PD7);   // LED ON
-    } else {
-        PORTD &= ~(1 << PD7);  // LED OFF
-    }
+            PORTD ^= (1 << PD7);   // LED ON
+            _delay_ms(100);
+        }
     }
 }
     // DDRD = 0xFF;              // LEDs on PORTD
