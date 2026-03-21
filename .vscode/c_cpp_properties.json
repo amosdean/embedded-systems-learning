@@ -1,0 +1,32 @@
+// {
+//   "configurations": [
+//     {
+//       "name": "AVR",
+//       "includePath": [
+//         "C:/msys64/mingw64/avr/include"
+//       ],
+//       "compilerPath": "C:\\msys64\\mingw64\\bin\\avr-gcc.exe",
+//       "intelliSenseMode": "gcc-x64"
+//     }
+//   ],
+//   "version": 4
+// }
+{
+    "configurations": [
+        {
+            "name": "AVR",
+            "compilerPath": "C:/msys64/mingw64/bin/avr-gcc.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64",
+            "includePath": [
+                "C:/msys64/mingw64/avr/include",
+                "${workspaceFolder}"
+            ],
+            "compilerArgs": [
+                "-mmcu=atmega328p"
+            ]
+        }
+    ],
+    "version": 4
+}
