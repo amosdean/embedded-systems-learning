@@ -5,14 +5,36 @@
 
 int main(void)
 {
-    DDRD |= (1 << PD7);
+    DDRB |= (1 << PB5); // First digit 
+    DDRB |= (1 << PB4); // Second digit 
+    DDRB |= (1 << PB3); // third digit 
+    DDRB |= (1 << PB2); // fourth digit 
+
     DDRD &= ~(1 << PD5); // button input
     PORTD |= (1 << PD5); // enable pull-up
+    int num = 0;
     while(1) {
-        if (!(PIND & (1 << PD5))) {
-            PORTD ^= (1 << PD7);   // LED ON
-            _delay_ms(10);
+        switch (num) {
+            case 0:
+                PORTB = (1 << PB5);
+                break;
+            case 1:
+                PORTB = (1 << PB4);
+                break;
+            case 2:
+                PORTB = (1 << PB3);
+                break;
+            // PORTB |= (1 << PB4);   // LED ON
+            case 3:
+                PORTB = (1 << PB2);
+                break;
+            // PORTB |= (1 << PB3);   // LED ON
+            // _delay_ms(100);
+    // PORTB ^= (1 << PB2);
         }
+
+        _delay_ms(5000);
+        num = (++num) % 4;
     }
 }
     // DDRD = 0xFF;              // LEDs on PORTD

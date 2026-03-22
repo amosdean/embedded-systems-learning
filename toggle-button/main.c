@@ -10,10 +10,9 @@ int main(void)
     PORTD |= (1 << PD5); // enable pull-up
     int num = 0;
     while(1) {
-        // if (!(PIND & (1 << PD5))) {
-        //     PORTD ^= (1 << PD7);   // LED ON
-        //     _delay_ms(10);
-        // }
-        // case num:
+        if (!(PIND & (1 << PD5))) {
+            PORTD ^= (1 << PD7);   // LED ON
+            _delay_ms(10);
+        }
     }
 }
