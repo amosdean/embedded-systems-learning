@@ -15,12 +15,10 @@ int main(void)
     PORTD |= (1 << PD5); // enable pull-up
     int num = 0;
     while(1) {
-        // PORTB =   (((num >> 0) & 1) << PB5)
-        //         | (((num >> 1) & 1) << PB4)
-        //         | (((num >> 2) & 1) << PB3)
-        //         | (((num >> 3) & 1) << PB2);
-        PORTB = (0b11000011 & PORTB) | (num << PB2);
-        _delay_ms(10000);
-        num = (++num) % 16;
+        if (!(PIND & (1 << PD5))) {
+            PORTB = (0b11000011 & PORTB) | (num << PB2);
+            _delay_ms(5000);
+            num = (++num) % 16;
+        }
     }
 } 
