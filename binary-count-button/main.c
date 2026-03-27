@@ -1,3 +1,4 @@
+#define F_CPU 16000000UL
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
@@ -17,7 +18,7 @@ int main(void)
     while(1) {
         if (!(PIND & (1 << PD5))) {
             PORTB = (0b11000011 & PORTB) | (num << PB2);
-            _delay_ms(5000);
+            _delay_ms(300);
             num = (++num) % 16;
         }
     }
