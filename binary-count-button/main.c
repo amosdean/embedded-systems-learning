@@ -19,7 +19,7 @@ int main(void)
         //         | (((num >> 1) & 1) << PB4)
         //         | (((num >> 2) & 1) << PB3)
         //         | (((num >> 3) & 1) << PB2);
-        PORTB = (num << PB2);
+        PORTB = (0b11000011 & PORTB) | (num << PB2);
         _delay_ms(10000);
         num = (++num) % 16;
     }
