@@ -20,5 +20,8 @@
 #define MOTORENABLE_DDR  DDRD
 #define MOTORENABLE_PIN  PD7
 
+#define MOTOR1_A = 2
+#define MOTOR1_B = 3
+
 
 
