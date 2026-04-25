@@ -35,11 +35,11 @@ void initPWM1(uint8_t freq) {
     TCCR2A |= (1 << COM2A1) | (1 << WGM20) | (1 << WGM21);
     TCCR2B = freq & 0x7;
     OCR2A = 0;
-    DDRD |= (1 << PD7);
+    DDRD |= (1 << PB3);
 }
 
 void setPWM1(uint8_t s) {
-    // use PWM from timer2A on PB4 (p11)
+    // use PWM from timer2A on PB3 (p11)
     OCR2A = s;
 }
 
