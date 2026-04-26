@@ -4,10 +4,11 @@
 #include <avr/io.h>
 #include <util/delay.h>
 static uint8_t latch_state;
+typedef struct {
+    uint8_t motornum;
+    uint8_t pwmfreq;
+} Motor;
 
-void shift_right(uint8_t bit) {
-
-}
 void latch_tx(void) {
     // latch low
     MOTORLATCH_PORT &= ~(1 << MOTORLATCH_PIN);
@@ -41,6 +42,35 @@ void initPWM1(uint8_t freq) {
 void setPWM1(uint8_t s) {
     // use PWM from timer2A on PB3 (p11)
     OCR2A = s;
+}
+
+void createMotor(uint8_t num, uint8_t freq) {
+    Motor m;
+    m.motornum = num;
+    m.pwmfreq = freq;
+
+    // enable?
+
+    switch(num) {
+        case 1:
+            latch_state &= ~(1 << MOTOR1_A) & ~(1 << MOTOR1_B);
+            latch_tx();
+            initPWM1(freq);
+            break;
+    }
+}
+
+void setSpeed(uint8_t speed, Motor m) {
+  switch (m.motornum) {
+  case 1:
+    setPWM1(speed); break;
+  case 2:
+    setPWM2(speed); break;
+  case 3:
+    setPWM3(speed); break;
+  case 4:
+    setPWM4(speed); break;
+  }
 }
 
 void run(uint8_t motornum, uint8_t cmd) {
