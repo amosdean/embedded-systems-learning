@@ -43,6 +43,40 @@ void setPWM1(uint8_t s) {
     OCR2A = s;
 }
 
+void run(uint8_t motornum, uint8_t cmd) {
+    uint8_t a, b;
+    switch(motornum) {
+        case 1:
+            a = MOTOR1_A; b = MOTOR1_B; break;
+    // case 2:
+    //     a = MOTOR2_A; b = MOTOR2_B; break;
+    // case 3:
+    //     a = MOTOR3_A; b = MOTOR3_B; break;
+    // case 4:
+    //     a = MOTOR4_A; b = MOTOR4_B; break;
+        default:
+            return;
+    }
+
+    switch(cmd) {
+        case FORWARD:
+            latch_state |= (1 << a);
+            latch_state &= ~(1 << b);
+            latch_tx();
+            break;
+        case BACKWARD:
+            latch_state &= ~(1 << a);
+            latch_state |= (1 << b);
+            latch_tx();
+            break;
+        case RELEASE:
+            latch_state &= ~(1 << a);
+            latch_state &= ~(1 << b);
+            latch_tx();
+            break;
+    }
+    // latch_tx();
+}
 
 int main() {
     // set direction pins
@@ -57,9 +91,15 @@ int main() {
         MOTORENABLE_PORT &= ~(1 << MOTORENABLE_PIN);
     // motor 1 shifts on 2, 3
     // for (uint8_t i = 0; i < 8; i++) {
-        latch_state = (1 << 2);
-        latch_tx();
-        _delay_ms(10000);
+        // latch_state = (1 << 2);
+        // latch_tx();
+        // _delay_ms(10000);
+    while(1) {
+        run(1, FORWARD);
+        _delay_ms(1000);
+        run(1, BACKWARD);
+        _delay_ms(1000);
+    }
   }
 
 
