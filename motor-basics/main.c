@@ -31,23 +31,56 @@ void latch_tx(void) {
     MOTORLATCH_PORT |= (1 << MOTORLATCH_PIN);
 }
 
-void initPWM1(uint8_t freq) {
+void initPWM(Motor *m, uint8_t freq) {
     // PWM timer2A (PB3 - pin 11)
-    TCCR2A |= (1 << COM2A1) | (1 << WGM20) | (1 << WGM21);
-    TCCR2B = freq & 0x7;
-    OCR2A = 0;
-    DDRD |= (1 << PB3);
+
+    switch(m->motornum) {
+        case 1:
+            TCCR2A |= (1 << COM2A1) | (1 << WGM20) | (1 << WGM21);
+            TCCR2B = freq & 0x7;
+            OCR2A = 0;
+            DDRB |= (1 << PB3);
+            break;
+        case 2:
+            TCCR2A |= (1 << COM2B1) | (1 << WGM20) | (1 << WGM21); // fast PWM, turn on oc2b
+            TCCR2B = freq & 0x7;
+            OCR2B = 0;
+            DDRD |= (1 << PD3);
+            break;
+        case 3:
+            TCCR0A |= (1 << COM0A1) | (1 << WGM00) | (1 << WGM01); // fast PWM, turn on OC0A
+            // TCCR0B = freq & 0x7;
+            OCR0A = 0;
+            DDRD |= (1 << PD6);
+            break;
+        case 4: 
+            TCCR0A |= (1 << COM0B1) | (1 << WGM00) | (1 << WGM01); // fast PWM, turn on oc0a
+            //TCCR0B = freq & 0x7;
+            OCR0B = 0;
+            DDRD |= (1 << PD5);
+            break;
+
+    }
 }
 
-void setPWM1(uint8_t s) {
-    // use PWM from timer2A on PB3 (p11)
-    OCR2A = s;
+void setPWM(Motor *m, uint8_t s) {
+    switch(m->motornum) {
+        case 1:
+            OCR2A = s; break;
+        case 2:
+            OCR2B = s; break;
+        case 3:
+            OCR0A = s; break;
+        case 4: 
+            OCR0B = s; break;
+
+    }
 }
 
-void createMotor(uint8_t num, uint8_t freq) {
-    Motor m;
-    m.motornum = num;
-    m.pwmfreq = freq;
+Motor createMotor(uint8_t num, uint8_t freq) {
+    Motor *m;
+    m->motornum = num;
+    m->pwmfreq = freq;
 
     // enable?
 
@@ -58,20 +91,21 @@ void createMotor(uint8_t num, uint8_t freq) {
             initPWM1(freq);
             break;
     }
+    return m;
 }
 
-void setSpeed(uint8_t speed, Motor m) {
-  switch (m.motornum) {
-  case 1:
-    setPWM1(speed); break;
-  case 2:
-    setPWM2(speed); break;
-  case 3:
-    setPWM3(speed); break;
-  case 4:
-    setPWM4(speed); break;
-  }
-}
+// void setSpeed(uint8_t speed, Motor *m) {
+//   switch (m->motornum) {
+//   case 1:
+//     setPWM(speed); break;
+//   case 2:
+//     setPWM(speed); break;
+//   case 3:
+//     setPWM3(speed); break;
+//   case 4:
+//     setPWM4(speed); break;
+//   }
+// }
 
 void run(uint8_t motornum, uint8_t cmd) {
     uint8_t a, b;
