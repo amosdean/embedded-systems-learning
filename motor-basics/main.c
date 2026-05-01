@@ -15,6 +15,7 @@ void latch_tx(void) {
 
     // data low
     MOTORDATA_PORT &= ~(1 << MOTORDATA_PIN);
+    // for(int i = 0; i < 8; i++) {
     for(int i = 7; i >= 0; i--) {
         // clock low
         MOTORCLK_PORT &= ~(1 << MOTORCLK_PIN);
@@ -49,13 +50,13 @@ void initPWM(Motor *m, uint8_t freq) {
             break;
         case 3:
             TCCR0A |= (1 << COM0A1) | (1 << WGM00) | (1 << WGM01); // fast PWM, turn on OC0A
-            // TCCR0B = freq & 0x7;
+            TCCR0B = freq & 0x7;
             OCR0A = 0;
             DDRD |= (1 << PD6);
             break;
         case 4: 
             TCCR0A |= (1 << COM0B1) | (1 << WGM00) | (1 << WGM01); // fast PWM, turn on oc0a
-            //TCCR0B = freq & 0x7;
+            TCCR0B = freq & 0x7;
             OCR0B = 0;
             DDRD |= (1 << PD5);
             break;
@@ -77,8 +78,9 @@ void setPWM(Motor *m, uint8_t s) {
     }
 }
 
-Motor createMotor(uint8_t num, uint8_t freq) {
-    Motor *m;
+Motor* createMotor(uint8_t num, uint8_t freq) {
+    static Motor motor;
+    Motor *m = &motor;
     m->motornum = num;
     m->pwmfreq = freq;
 
@@ -88,7 +90,22 @@ Motor createMotor(uint8_t num, uint8_t freq) {
         case 1:
             latch_state &= ~(1 << MOTOR1_A) & ~(1 << MOTOR1_B);
             latch_tx();
-            initPWM1(freq);
+            initPWM(m, freq);
+            break;
+        case 2:
+            latch_state &= ~(1 << MOTOR2_A) & ~(1 << MOTOR2_B);
+            latch_tx();
+            initPWM(m, freq);
+            break;
+        case 3:
+            latch_state &= ~(1 << MOTOR3_A) & ~(1 << MOTOR3_B);
+            latch_tx();
+            initPWM(m, freq);
+            break;
+        case 4:
+            latch_state &= ~(1 << MOTOR4_A) & ~(1 << MOTOR4_B);
+            latch_tx();
+            initPWM(m, freq);
             break;
     }
     return m;
@@ -112,12 +129,12 @@ void run(uint8_t motornum, uint8_t cmd) {
     switch(motornum) {
         case 1:
             a = MOTOR1_A; b = MOTOR1_B; break;
-    // case 2:
-    //     a = MOTOR2_A; b = MOTOR2_B; break;
-    // case 3:
-    //     a = MOTOR3_A; b = MOTOR3_B; break;
-    // case 4:
-    //     a = MOTOR4_A; b = MOTOR4_B; break;
+        case 2:
+            a = MOTOR2_A; b = MOTOR2_B; break;
+        case 3:
+            a = MOTOR3_A; b = MOTOR3_B; break;
+        case 4:
+            a = MOTOR4_A; b = MOTOR4_B; break;
         default:
             return;
     }
@@ -149,21 +166,27 @@ int main() {
     MOTORCLK_DDR |= (1 << MOTORCLK_PIN);
     MOTORENABLE_DDR |= (1 << MOTORENABLE_PIN);
     
-    // MOTORCLK_PORT &= ~(1 << MOTORCLK_PIN); 
-    // MOTORCLK_PORT |= (1 << MOTORCLK_PIN); 
+    // clear latch
+    latch_state = 0;
+    latch_tx();
+    MOTORENABLE_PORT &= ~(1 << MOTORENABLE_PIN);
 
-        MOTORENABLE_PORT &= ~(1 << MOTORENABLE_PIN);
-    // motor 1 shifts on 2, 3
-    // for (uint8_t i = 0; i < 8; i++) {
-        // latch_state = (1 << 2);
-        // latch_tx();
-        // _delay_ms(10000);
+    Motor *m = createMotor(1, 125);
+    setPWM(m, 200);
+    
     while(1) {
-        run(1, FORWARD);
+        run(m->motornum, FORWARD);
         _delay_ms(1000);
-        run(1, BACKWARD);
+        run(m->motornum, BACKWARD);
         _delay_ms(1000);
     }
+
+    // while(1) {
+    //     run(1, FORWARD);
+    //     _delay_ms(1000);
+    //     run(1, BACKWARD);
+    //     _delay_ms(1000);
+    // }
   }
 
 
