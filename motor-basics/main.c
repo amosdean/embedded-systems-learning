@@ -3,11 +3,29 @@
 #include "hw130.h"
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 static uint8_t latch_state;
+volatile uint16_t counter = 0;
+
 typedef struct {
     uint8_t motornum;
     uint8_t pwmfreq;
 } Motor;
+
+
+ISR(TIMER1_COMPA_vect) {
+    // this code runs every time TCNT1 == OCR1A
+    counter++; // simple counter
+}
+// #define BUTTON (1 << PB0)
+void timer1_init() {
+    // enable ctc (clear timer on compare) mode and prescaler of 64
+    TCCR1B = (1 << WGM12) | (1 << CS11) | (1 << CS10);
+    // set compare to .5 second matching cycle
+    OCR1A = 249; // 16MHz / 64 prescaler / 250 counts = 1 millisecond
+    TIMSK1 |= (1 << OCIE1A); // enable compare interrupt
+}
+
 
 void latch_tx(void) {
     // latch low
@@ -166,6 +184,10 @@ int main() {
     MOTORCLK_DDR |= (1 << MOTORCLK_PIN);
     MOTORENABLE_DDR |= (1 << MOTORENABLE_PIN);
     
+    // counter
+    timer1_init();
+    sei(); // enable global interrupts
+    
     // clear latch
     latch_state = 0;
     latch_tx();
@@ -174,19 +196,24 @@ int main() {
     Motor *m = createMotor(1, 125);
     setPWM(m, 200);
     
+    uint8_t state = 0;
     while(1) {
-        run(m->motornum, FORWARD);
-        _delay_ms(1000);
-        run(m->motornum, BACKWARD);
-        _delay_ms(1000);
+        
+        if (counter >= 1000) {
+            if(state == 0) {
+                run(m->motornum, FORWARD);
+                state = 1;
+            }
+            else  {
+                run(m->motornum, BACKWARD);
+                state = 0;
+            }
+            counter = 0;
+        }
+        // _delay_ms(1000);
+        // _delay_ms(1000);
     }
 
-    // while(1) {
-    //     run(1, FORWARD);
-    //     _delay_ms(1000);
-    //     run(1, BACKWARD);
-    //     _delay_ms(1000);
-    // }
   }
 
 
