@@ -2,10 +2,10 @@
 
 #include "hw130.h"
 #include <avr/io.h>
-#include <util/delay.h>
 #include <avr/interrupt.h>
 static uint8_t latch_state;
-volatile uint16_t counter = 0;
+// counter 8 bit to mimic AVR CPU
+volatile uint8_t counter = 0;
 
 typedef struct {
     uint8_t motornum;
