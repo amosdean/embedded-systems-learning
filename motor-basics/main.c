@@ -22,10 +22,9 @@ void timer1_init() {
     // enable ctc (clear timer on compare) mode and prescaler of 64
     TCCR1B = (1 << WGM12) | (1 << CS11) | (1 << CS10);
     // set compare to .5 second matching cycle
-    OCR1A = 249; // 16MHz / 64 prescaler / 250 counts = 1 millisecond
+    OCR1A = 2499; // 16MHz / 64 prescaler / 250 counts = 1 millisecond
     TIMSK1 |= (1 << OCIE1A); // enable compare interrupt
 }
-
 
 void latch_tx(void) {
     // latch low
@@ -55,7 +54,9 @@ void initPWM(Motor *m, uint8_t freq) {
 
     switch(m->motornum) {
         case 1:
+            // use PWM from timer2A on PB3 (Arduino pin #11)
             TCCR2A |= (1 << COM2A1) | (1 << WGM20) | (1 << WGM21);
+            // set prescaler and start PWM
             TCCR2B = freq & 0x7;
             OCR2A = 0;
             DDRB |= (1 << PB3);
@@ -199,7 +200,7 @@ int main() {
     uint8_t state = 0;
     while(1) {
         
-        if (counter >= 1000) {
+        if (counter >= 100) {
             if(state == 0) {
                 run(m->motornum, FORWARD);
                 state = 1;
