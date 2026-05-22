@@ -40,3 +40,5 @@ typedef struct {
     uint8_t motornum;
     uint8_t pwmfreq;
 } Motor;
+
+Motor motors[4];

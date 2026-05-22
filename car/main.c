@@ -12,42 +12,44 @@
 
 
 int main() {
-    // set direction pins
-    MOTORLATCH_DDR |= (1 << MOTORLATCH_PIN);
-    MOTORDATA_DDR |= (1 << MOTORDATA_PIN);
-    MOTORCLK_DDR |= (1 << MOTORCLK_PIN);
-    MOTORENABLE_DDR |= (1 << MOTORENABLE_PIN);
+    // // set direction pins
+    // MOTORLATCH_DDR |= (1 << MOTORLATCH_PIN);
+    // MOTORDATA_DDR |= (1 << MOTORDATA_PIN);
+    // MOTORCLK_DDR |= (1 << MOTORCLK_PIN);
+    // MOTORENABLE_DDR |= (1 << MOTORENABLE_PIN);
     
-    // counter
-    timer1_init();
-    sei(); // enable global interrupts
+    // // counter
+    // timer1_init();
+    // sei(); // enable global interrupts
     
-    // clear latch
-    latch_state = 0;
-    latch_tx();
-    MOTORENABLE_PORT &= ~(1 << MOTORENABLE_PIN);
+    // // clear latch
+    // latch_state = 0;
+    // latch_tx();
+    // MOTORENABLE_PORT &= ~(1 << MOTORENABLE_PIN);
 
-    Motor *m1 = &motors[0];
-    createMotor(1, 125);
-    Motor *m2 = &motors[1];
-    createMotor(2, 125);
+    // Motor *m1 = &motors[0];
+    // createMotor(1, 125);
+    // Motor *m2 = &motors[1];
+    // createMotor(2, 125);
 
-    setPWM(m1, 200);
-    setPWM(m2, 200);
+    // setPWM(m1, 200);
+    // setPWM(m2, 200);
+    motor_init();
     
     uint8_t state = 0;
     while(1) {
         if (counter >= 100) {
-            if(state == 0) {
-                run(m1->motornum, FORWARD);
-                run(m2->motornum, FORWARD);
-                state = 1;
-            }
-            else  {
-                run(m1->motornum, BACKWARD);
-                run(m2->motornum, BACKWARD);
-                state = 0;
-            }
+            scheduler_tick();
+            // if(state == 0) {
+            //     run(motors[0].motornum, FORWARD);
+            //     run(motors[1].motornum, FORWARD);
+            //     state = 1;
+            // }
+            // else  {
+            //     run(motors[0].motornum, BACKWARD);
+            //     run(motors[1].motornum, BACKWARD);
+            //     state = 0;
+            // }
             counter = 0;
         }
         // _delay_ms(1000);

@@ -1,7 +1,31 @@
 #include "motor.h"
 #include "timer.h"
-#include "timer.c"
-static Motor motors[4];
+
+Motor motors[4];
+static uint8_t latch_state = 0;
+
+void motor_init() {
+    // set direction pins
+    MOTORLATCH_DDR |= (1 << MOTORLATCH_PIN);
+    MOTORDATA_DDR |= (1 << MOTORDATA_PIN);
+    MOTORCLK_DDR |= (1 << MOTORCLK_PIN);
+    MOTORENABLE_DDR |= (1 << MOTORENABLE_PIN);
+    
+    // counter
+    timer1_init();
+    sei(); // enable global interrupts
+    
+    // clear latch
+    latch_state = 0;
+    latch_tx();
+    MOTORENABLE_PORT &= ~(1 << MOTORENABLE_PIN);
+
+    createMotor(1, 125);
+    createMotor(2, 125);
+
+    setPWM(&motors[0], 200);
+    setPWM(&motors[1], 200);
+}
 
 void initPWM(Motor *m, uint8_t freq) {
     // PWM timer2A (PB3 - pin 11)
@@ -131,4 +155,27 @@ void run(uint8_t motornum, uint8_t cmd) {
             break;
     }
     // latch_tx();
+}
+
+static void latch_tx(void) {
+    // latch low
+    MOTORLATCH_PORT &= ~(1 << MOTORLATCH_PIN);
+
+    // data low
+    MOTORDATA_PORT &= ~(1 << MOTORDATA_PIN);
+    // for(int i = 0; i < 8; i++) {
+    for(int i = 7; i >= 0; i--) {
+        // clock low
+        MOTORCLK_PORT &= ~(1 << MOTORCLK_PIN);
+        if(latch_state & (1 << i)) {
+            MOTORDATA_PORT |= (1 << MOTORDATA_PIN);
+        }
+        else {
+            MOTORDATA_PORT &= ~(1 << MOTORDATA_PIN);
+        }
+        // clock high
+        MOTORCLK_PORT |= (1 << MOTORCLK_PIN);
+    }
+    //latch high
+    MOTORLATCH_PORT |= (1 << MOTORLATCH_PIN);
 }

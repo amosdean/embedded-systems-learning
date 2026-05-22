@@ -10,7 +10,7 @@ PROGRAMMER = arduino
 
 CFLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Os -Wall
 
-SRC = main.c motor.c
+SRC = main.c motor.c scheduler.c timer.c
 TARGET = main
 
 all: $(TARGET).hex
