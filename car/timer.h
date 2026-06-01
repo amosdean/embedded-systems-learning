@@ -1,11 +1,9 @@
-// #include "motor.h"
-// #include "motor.c"
-// #include <avr/io.h>
-// #include <avr/interrupt.h>
-volatile uint8_t counter;
+#ifndef TIMER_H
+#define TIMER_H
 
-ISR(TIMER2_COMPA_vect) ;
+#include <avr/io.h>
+extern volatile uint8_t counter;
 
 void timer1_init(); 
 
-void latch_tx(void); 
+#endif

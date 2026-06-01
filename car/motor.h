@@ -1,3 +1,6 @@
+#ifndef MOTOR_H
+#define MOTOR_H
+
 #include <avr/io.h>
 // Arduino pin names for interface to 74HCT595 latch
 // #define MOTORLATCH 12
@@ -41,4 +44,15 @@ typedef struct {
     uint8_t pwmfreq;
 } Motor;
 
-Motor motors[4];
+enum motor_pos {
+    FRONT_LEFT = 0,
+    FRONT_RIGHT = 1,
+    BACK_LEFT = 2,
+    BACK_RIGHT = 3
+};
+
+void motor_init();
+void setPWM(enum motor_pos pos, uint8_t s); 
+void createMotor(enum motor_pos pos, uint8_t freq); 
+void run(enum motor_pos pos, uint8_t cmd);
+#endif

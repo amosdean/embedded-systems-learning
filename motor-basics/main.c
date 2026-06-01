@@ -3,6 +3,7 @@
 #include "hw130.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/delay.h>
 static uint8_t latch_state;
 // counter 8 bit to mimic AVR CPU
 volatile uint8_t counter = 0;
@@ -211,6 +212,9 @@ int main() {
             }
             counter = 0;
         }
+DDRB |= (1 << PB5);
+PORTB ^= (1 << PB5);
+_delay_ms(5000);
         // _delay_ms(1000);
         // _delay_ms(1000);
     }

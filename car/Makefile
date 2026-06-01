@@ -8,9 +8,9 @@ PORT = COM3
 BAUD = 115200
 PROGRAMMER = arduino
 
-CFLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Os -Wall
+CFLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Os -Wall -Wextra -g
 
-SRC = main.c motor.c scheduler.c timer.c
+SRC = main.c motor.c timer.c scheduler.c
 TARGET = main
 
 all: $(TARGET).hex

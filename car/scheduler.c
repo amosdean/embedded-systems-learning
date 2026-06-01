@@ -1,24 +1,36 @@
 #include "scheduler.h"
 #include "motor.h"
-#include <avr/io.h>
+#include <util/delay.h>
+// #include <avr/io.h>
 
-const Maneuver sequence[] = {
-    {FORWARD,  FORWARD,  200, 200, 200},  // straight, 2 sec
-    {FORWARD,  BACKWARD, 150, 150, 50},   // turn left, 0.5 sec
-    {FORWARD,  FORWARD,  200, 200, 200},  // straight again
-    {RELEASE,  RELEASE,  0,   0,   100},  // stop
-};
+static void execute_maneuver(const Maneuver maneuver) {
+    setPWM(FRONT_LEFT, maneuver.leftSpeed);
+    setPWM(FRONT_RIGHT, maneuver.rightSpeed);
+    run(FRONT_LEFT, maneuver.leftCmd);
+    run(FRONT_RIGHT, maneuver.rightCmd);
+}
 
-void scheduler_tick() {
-    
-            if(state == 0) {
-                run(motors[0].motornum, FORWARD);
-                run(motors[1].motornum, FORWARD);
-                state = 1;
-            }
-            else  {
-                run(motors[0].motornum, BACKWARD);
-                run(motors[1].motornum, BACKWARD);
-                state = 0;
-            }
-        }
+void scheduler_start(Scheduler *scheduler) {
+    execute_maneuver(scheduler->sequence[scheduler->current]);
+}
+
+void scheduler_tick(Scheduler *scheduler) {
+    scheduler->elapsed++;
+
+    if(scheduler->elapsed >= scheduler->sequence[scheduler->current].duration) {
+        // run(FRONT_LEFT, FORWARD);
+        // _delay_ms(1000);
+        // run(FRONT_LEFT, BACKWARD);
+        // _delay_ms(1000);
+        // update for next
+        scheduler->current++;
+        scheduler->elapsed = 0;
+
+        // loop maneuver sequence
+        if (scheduler->current >= scheduler->length) 
+            scheduler->current = 0;
+        // execute maneuver
+
+        execute_maneuver(scheduler->sequence[scheduler->current]);
+    }
+}

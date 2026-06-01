@@ -1,13 +1,12 @@
-#include "motor.h"
 #include "timer.h"
-// #include "motor.c"
 #include <avr/io.h>
 #include <avr/interrupt.h>
 volatile uint8_t counter = 0;
 
-ISR(TIMER2_COMPA_vect) {
+ISR(TIMER1_COMPA_vect) {
     // this code runs every time TCNT1 == OCR1A
     counter++; // simple counter
+    // PORTB ^= (1 << PB5);
 }
 // #define BUTTON (1 << PB0)
 void timer1_init() {
