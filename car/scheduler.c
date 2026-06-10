@@ -18,19 +18,15 @@ void scheduler_tick(Scheduler *scheduler) {
     scheduler->elapsed++;
 
     if(scheduler->elapsed >= scheduler->sequence[scheduler->current].duration) {
-        // run(FRONT_LEFT, FORWARD);
-        // _delay_ms(1000);
-        // run(FRONT_LEFT, BACKWARD);
-        // _delay_ms(1000);
-        // update for next
+        // move to next maneuver
         scheduler->current++;
         scheduler->elapsed = 0;
 
         // loop maneuver sequence
         if (scheduler->current >= scheduler->length) 
             scheduler->current = 0;
-        // execute maneuver
 
+        // execute maneuver
         execute_maneuver(scheduler->sequence[scheduler->current]);
     }
 }

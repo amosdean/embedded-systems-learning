@@ -3,7 +3,8 @@
 
 // static to keep internal scope (encapulate)
 static Motor motors[4];
-static uint8_t latch_state; // 
+static uint8_t latch_state;
+static const uint8_t DEFAULT_FREQ = 125; // about 50% duty cycle with 64 prescaler
 
 static void latch_tx(void) {
     // latch low
@@ -11,16 +12,13 @@ static void latch_tx(void) {
 
     // data low
     MOTORDATA_PORT &= ~(1 << MOTORDATA_PIN);
-    // for(int i = 0; i < 8; i++) {
     for(int i = 7; i >= 0; i--) {
         // clock low
         MOTORCLK_PORT &= ~(1 << MOTORCLK_PIN);
-        if(latch_state & (1 << i)) {
+        if(latch_state & (1 << i)) 
             MOTORDATA_PORT |= (1 << MOTORDATA_PIN);
-        }
-        else {
+        else 
             MOTORDATA_PORT &= ~(1 << MOTORDATA_PIN);
-        }
         // clock high
         MOTORCLK_PORT |= (1 << MOTORCLK_PIN);
     }
@@ -40,12 +38,8 @@ void motor_init() {
     latch_tx();
     MOTORENABLE_PORT &= ~(1 << MOTORENABLE_PIN);
 
-    createMotor(FRONT_LEFT, 125);
-    createMotor(FRONT_RIGHT, 125);
-
-    // ?? is this necessary if they are initialized in createMotor?
-    setPWM(FRONT_LEFT, 200);
-    setPWM(FRONT_RIGHT, 200);
+    createMotor(FRONT_LEFT, DEFAULT_FREQ);
+    createMotor(FRONT_RIGHT, DEFAULT_FREQ);
 }
 
 void initPWM(enum motor_pos pos, uint8_t freq) {
@@ -53,7 +47,7 @@ void initPWM(enum motor_pos pos, uint8_t freq) {
 
     switch(pos) {
         case FRONT_LEFT:
-            // use PWM from timer2A on PB3 (Arduino pin #11)
+            // use PWM from timer2A on PB3 (Arduino pin 11)
             TCCR2A |= (1 << COM2A1) | (1 << WGM20) | (1 << WGM21);
             // set prescaler and start PWM
             TCCR2B = freq & 0x7;
@@ -96,7 +90,6 @@ void setPWM(enum motor_pos pos, uint8_t s) {
 }
 
 void createMotor(enum motor_pos pos, uint8_t freq) {
-
     Motor *m = &motors[pos];
     m->motornum = pos;
     m->pwmfreq = freq;
@@ -123,21 +116,7 @@ void createMotor(enum motor_pos pos, uint8_t freq) {
             initPWM(pos, freq);
             break;
     }
-    // return m;
 }
-
-// void setSpeed(uint8_t speed, Motor *m) {
-//   switch (m->motornum) {
-//   case 1:
-//     setPWM(speed); break;
-//   case 2:
-//     setPWM(speed); break;
-//   case 3:
-//     setPWM3(speed); break;
-//   case 4:
-//     setPWM4(speed); break;
-//   }
-// }
 
 void run(enum motor_pos pos, uint8_t cmd) {
     uint8_t a, b;

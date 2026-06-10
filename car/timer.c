@@ -6,9 +6,8 @@ volatile uint8_t counter = 0;
 ISR(TIMER1_COMPA_vect) {
     // this code runs every time TCNT1 == OCR1A
     counter++; // simple counter
-    // PORTB ^= (1 << PB5);
 }
-// #define BUTTON (1 << PB0)
+
 void timer1_init() {
     // enable ctc (clear timer on compare) mode and prescaler of 64
     TCCR1B = (1 << WGM12) | (1 << CS11) | (1 << CS10);
