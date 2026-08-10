@@ -1,0 +1,2 @@
+As a CS major currently working in a BI role - I started this project to apply the concepts I've been learning from reading and watching lecture series.
+Started with AVR bare-metal on Arduino, transitioned to STM32 Cortex-M0+ bare-metal including GPIO, timer interrupts, PWM, and UART
