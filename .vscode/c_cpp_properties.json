@@ -26,7 +26,24 @@
             "compilerArgs": [
                 "-mmcu=atmega328p"
             ]
-        }
+        },
+        {
+      "name": "STM32",
+      "compilerPath": "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/bin/arm-none-eabi-gcc.exe",
+      "includePath": [
+        "${workspaceFolder}/STM32/stm32-car/Core/Inc",
+        "${workspaceFolder}/STM32/stm32-car/Drivers/STM32C0xx_HAL_Driver/Inc",
+        "${workspaceFolder}/STM32/stm32-car/Drivers/STM32C0xx_HAL_Driver/Inc/Legacy",
+        "${workspaceFolder}/STM32/stm32-car/Drivers/CMSIS/Device/ST/STM32C0xx/Include",
+        "${workspaceFolder}/STM32/stm32-car/Drivers/CMSIS/Include",
+        "${workspaceFolder}/STM32/stm32-car/**"
+      ],
+      "defines": [
+        "USE_HAL_DRIVER",
+        "STM32C031xx"
+      ],
+      "intelliSenseMode": "windows-gcc-x64"
+    }
     ],
     "version": 4
 }
