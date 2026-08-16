@@ -46,7 +46,7 @@
 
 typedef struct {
     uint8_t motornum;
-    uint8_t pwmfreq;
+    // uint8_t pwmfreq;
 } Motor;
 
 enum motor_pos {
@@ -56,8 +56,8 @@ enum motor_pos {
     BACK_RIGHT = 3
 };
 
-void motor_init();
+void initMotor();
 void setPWM(enum motor_pos pos, uint8_t s); 
-void createMotor(enum motor_pos pos, uint8_t freq); 
+// void createMotor(enum motor_pos pos, uint8_t freq); 
 void run(enum motor_pos pos, uint8_t cmd);
 #endif

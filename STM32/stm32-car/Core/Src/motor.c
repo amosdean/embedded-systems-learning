@@ -1,10 +1,10 @@
 #include "motor.h"
 
 static Motor motors[4];
-static uint8_t latch_state;
+static uint8_t latchState;
 static const uint8_t DEFAULT_FREQ = 125;
 
-void motor_init() {
+void initMotor() {
     RCC->IOPENR = RCC_IOPENR_GPIOAEN; // latch and data
     RCC->IOPENR = RCC_IOPENR_GPIOBEN; // clock
 
@@ -17,12 +17,29 @@ void motor_init() {
     MOTORCLK_PORT->MODER &= ~GPIO_MODER_MODE10_Msk;
     MOTORCLK_PORT->MODER |= GPIO_MODER_MODE10_0;
 
-    latch_state = 0;
-    latch_tx();
+    latchState = 0;
+    txLatch();
 
-    createMotor(FRONT_LEFT, DEFAULT_FREQ);
-    createMotor(FRONT_RIGHT, DEFAULT_FREQ);
-
+    for(int pos = 0; pos < 4; pos++) {
+        Motor *m = &motors[pos];
+        m->motornum = pos;
+        switch(pos) {
+            case FRONT_LEFT:
+                latchState &= ~(1 << MOTOR1_A) & ~(1 << MOTOR1_B);
+                break;
+            case FRONT_RIGHT:
+                latchState &= ~(1 << MOTOR2_A) & ~(1 << MOTOR2_B);
+                break;
+            case BACK_LEFT:
+                latchState &= ~(1 << MOTOR3_A) & ~(1 << MOTOR3_B);
+                break;
+            case BACK_RIGHT: 
+                latchState &= ~(1 << MOTOR4_A) & ~(1 << MOTOR4_B);
+                break;
+        }
+    }
+    txLatch();
+    initPWM(DEFAULT_FREQ);
 }
 
 void initPWM(uint8_t freq) {
@@ -41,7 +58,8 @@ void initPWM(uint8_t freq) {
     TIM14->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // set to PWM mode 1 (110)
     TIM14->CCMR1 |= TIM_CCMR1_OC1PE; // enable preload
     TIM14->CCER |= TIM_CCER_CC1E; // enable output
-    TIM14->CCR1 = (freq * TIM14->ARR) / 255; // set duty cycle
+    // TIM14->CCR1 = (freq * TIM14->ARR) / 255; // set duty cycle
+    setPWM(FRONT_LEFT, freq);
     
     /* FRONT RIGHT */ 
     // PB3 
@@ -60,7 +78,8 @@ void initPWM(uint8_t freq) {
     TIM3->CCMR1 |= TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2; // PWM M1
     TIM3->CCMR1 |= TIM_CCMR1_OC2PE;
     TIM3->CCER |= TIM_CCER_CC2E;
-    TIM3->CCR2 = (freq * TIM3->ARR) / 255;
+    // TIM3->CCR2 = (freq * TIM3->ARR) / 255;
+    setPWM(FRONT_RIGHT, freq);
     
     /* BACK LEFT */
     // PB4 
@@ -74,7 +93,8 @@ void initPWM(uint8_t freq) {
     TIM3->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // PWM M1
     TIM3->CCMR1 |= TIM_CCMR1_OC1PE;
     TIM3->CCER |= TIM_CCER_CC1E;
-    TIM3->CCR1 = (freq * TIM3->ARR) / 255;
+    // TIM3->CCR1 = (freq * TIM3->ARR) / 255;
+    setPWM(BACK_LEFT, freq);
     
     /* BACK RIGHT */
     // PB5 
@@ -88,33 +108,72 @@ void initPWM(uint8_t freq) {
     TIM3->CCMR2 |= TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2; // PWM M1
     TIM3->CCMR2 |= TIM_CCMR2_OC3PE;
     TIM3->CCER |= TIM_CCER_CC3E;
-    TIM3->CCR3 = (freq * TIM3->ARR) / 255;
+    // TIM3->CCR3 = (freq * TIM3->ARR) / 255;
+    setPWM(BACK_RIGHT, freq);
 
     // Timer Enables
     TIM14->CR1 |= TIM_CR1_CEN; 
     TIM3->CR1 |= TIM_CR1_CEN; 
 }
 
-void createMotor(enum motor_pos, uint8_t freq) {
-    Motor *m = &motors[pos];
-    m->motornum = pos;
-    m->pwmfreq = freq;
+void setPWM(enum motor_pos pos, uint8_t freq) {
+    switch(pos) {
+        case FRONT_LEFT:
+            TIM14->CCR1 = (freq * TIM14->ARR) / 255; break;
+        case FRONT_RIGHT:
+            TIM3->CCR2 = (freq * TIM3->ARR) / 255; break;
+        case BACK_LEFT:
+            TIM3->CCR1 = (freq * TIM3->ARR) / 255; break;
+        case BACK_RIGHT: 
+            TIM3->CCR3 = (freq * TIM3->ARR) / 255;break;
+    }
 }
-// void initPWM(enum motor_pos pos, uint8_t freq) {
-//     switch(pos) {
-//         case FRONT_LEFT:
-            
 
-static void latch_tx(void) {
+static void txLatch(void) {
     MOTORLATCH_LOW;
     MOTORDATA_LOW;
     for(int i = 7; i >= 0; i--) {
         MOTORCLK_LOW;
-        if(latch_state & (1 << i))
+        if(latchState & (1 << i))
             MOTORDATA_HIGH;
         else
             MOTORDATA_LOW;
         MOTORCLK_HIGH;
     }
     MOTORLATCH_HIGH;
+}
+
+void run(enum motor_pos pos, uint8_t cmd) {
+    uint8_t a, b;
+    switch(pos) {
+        case FRONT_LEFT:
+            a = MOTOR1_A; b = MOTOR1_B; break;
+        case FRONT_RIGHT:
+            a = MOTOR2_A; b = MOTOR2_B; break;
+        case BACK_LEFT:
+            a = MOTOR3_A; b = MOTOR3_B; break;
+        case BACK_RIGHT:
+            a = MOTOR4_A; b = MOTOR4_B; break;
+        default:
+            return;
+    }
+
+    switch(cmd) {
+        case FORWARD:
+            latchState |= (1 << a);
+            latchState &= ~(1 << b);
+            txLatch();
+            break;
+        case BACKWARD:
+            latchState &= ~(1 << a);
+            latchState |= (1 << b);
+            txLatch();
+            break;
+        case RELEASE:
+            latchState &= ~(1 << a);
+            latchState &= ~(1 << b);
+            txLatch();
+            break;
+    }
+    // txLatch();
 }
