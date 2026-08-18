@@ -8,9 +8,10 @@ static void executeManeuver(const Maneuver maneuver) {
     run(FRONT_RIGHT, maneuver.rightCmd);
 }
 
-void schedulerStart(Scheduler scheduler) {
+void startScheduler(Scheduler scheduler) {
     executeManeuver(scheduler.sequence[scheduler.current_maneuver]);
 }
+
 void tickScheduler(Scheduler *scheduler) {
     const Maneuver *cur_maneuver = &scheduler->sequence[scheduler->current_maneuver];
     // cur_maneuver++;
