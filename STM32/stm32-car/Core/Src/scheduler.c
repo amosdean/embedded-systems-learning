@@ -1,5 +1,6 @@
 #include "scheduler.h"
 #include "motor.h"
+#include "uart.h"
 
 static void executeManeuver(const Maneuver maneuver) {
     setPWM(FRONT_LEFT, maneuver.leftSpeed);
@@ -25,7 +26,7 @@ void tickScheduler(Scheduler *scheduler) {
         // loop maneuver sequence
         if (scheduler->current_maneuver >= scheduler->length) 
             scheduler->current_maneuver = 0;
-        
+        uart_send_string("Executing next maneuver\r\n");
         executeManeuver(*cur_maneuver);
     }
 }

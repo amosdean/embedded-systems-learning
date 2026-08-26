@@ -4,6 +4,6 @@
 #include "stm32c0xx.h"
 extern volatile uint8_t counter;
 
-void timer1_init();
+void timer_init();
 
 #endif

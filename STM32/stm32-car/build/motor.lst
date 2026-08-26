@@ -1,0 +1,1668 @@
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 1
+
+
+   1              		.cpu cortex-m0plus
+   2              		.arch armv6s-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.file	"motor.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Core/Src/motor.c"
+  18              		.section	.rodata.txLatch.str1.4,"aMS",%progbits,1
+  19              		.align	2
+  20              	.LC0:
+  21 0000 5472616E 		.ascii	"Transmitting latch state\015\012\000"
+  21      736D6974 
+  21      74696E67 
+  21      206C6174 
+  21      63682073 
+  22 001b 00       		.align	2
+  23              	.LC2:
+  24 001c 4C617463 		.ascii	"Latch state: \000"
+  24      68207374 
+  24      6174653A 
+  24      2000
+  25 002a 0000     		.align	2
+  26              	.LC5:
+  27 002c 25640D0A 		.ascii	"%d\015\012\000"
+  27      00
+  28              		.section	.text.txLatch,"ax",%progbits
+  29              		.align	1
+  30              		.syntax unified
+  31              		.code	16
+  32              		.thumb_func
+  34              	txLatch:
+  35              	.LFB217:
+   1:Core/Src/motor.c **** #include "motor.h"
+   2:Core/Src/motor.c **** #include "uart.h"
+   3:Core/Src/motor.c **** 
+   4:Core/Src/motor.c **** static Motor motors[4];
+   5:Core/Src/motor.c **** static uint8_t latchState;
+   6:Core/Src/motor.c **** static const uint8_t DEFAULT_FREQ = 125; // about 50% duty cycle with 64 prescaler
+   7:Core/Src/motor.c **** 
+   8:Core/Src/motor.c **** static void txLatch() {
+  36              		.loc 1 8 23 view -0
+  37              		.cfi_startproc
+  38              		@ args = 0, pretend = 0, frame = 16
+  39              		@ frame_needed = 0, uses_anonymous_args = 0
+  40 0000 10B5     		push	{r4, lr}
+  41              	.LCFI0:
+  42              		.cfi_def_cfa_offset 8
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 2
+
+
+  43              		.cfi_offset 4, -8
+  44              		.cfi_offset 14, -4
+  45 0002 84B0     		sub	sp, sp, #16
+  46              	.LCFI1:
+  47              		.cfi_def_cfa_offset 24
+   9:Core/Src/motor.c ****     uart_send_string("Transmitting latch state\r\n");
+  48              		.loc 1 9 5 view .LVU1
+  49 0004 2248     		ldr	r0, .L7
+  50 0006 FFF7FEFF 		bl	uart_send_string
+  51              	.LVL0:
+  10:Core/Src/motor.c ****     uart_send_string("Latch state: ");
+  52              		.loc 1 10 5 view .LVU2
+  53 000a 2248     		ldr	r0, .L7+4
+  54 000c FFF7FEFF 		bl	uart_send_string
+  55              	.LVL1:
+  11:Core/Src/motor.c ****     char buf[10];
+  56              		.loc 1 11 5 view .LVU3
+  12:Core/Src/motor.c ****     sprintf(buf, "%d\r\n", latchState);
+  57              		.loc 1 12 5 view .LVU4
+  58 0010 214B     		ldr	r3, .L7+8
+  59 0012 1A78     		ldrb	r2, [r3]
+  60 0014 2149     		ldr	r1, .L7+12
+  61 0016 01AC     		add	r4, sp, #4
+  62 0018 2000     		movs	r0, r4
+  63 001a FFF7FEFF 		bl	sprintf
+  64              	.LVL2:
+  13:Core/Src/motor.c ****     uart_send_string(buf);
+  65              		.loc 1 13 5 view .LVU5
+  66 001e 2000     		movs	r0, r4
+  67 0020 FFF7FEFF 		bl	uart_send_string
+  68              	.LVL3:
+  14:Core/Src/motor.c ****     MOTORLATCH_LOW;
+  69              		.loc 1 14 5 view .LVU6
+  70 0024 A023     		movs	r3, #160
+  71 0026 DB05     		lsls	r3, r3, #23
+  72 0028 5A69     		ldr	r2, [r3, #20]
+  73 002a 4021     		movs	r1, #64
+  74 002c 8A43     		bics	r2, r1
+  75 002e 5A61     		str	r2, [r3, #20]
+  15:Core/Src/motor.c ****     MOTORDATA_LOW;
+  76              		.loc 1 15 5 view .LVU7
+  77 0030 5A69     		ldr	r2, [r3, #20]
+  78 0032 1B49     		ldr	r1, .L7+16
+  79 0034 0A40     		ands	r2, r1
+  80 0036 5A61     		str	r2, [r3, #20]
+  16:Core/Src/motor.c ****     for(int i = 7; i >= 0; i--) {
+  81              		.loc 1 16 5 view .LVU8
+  82              	.LBB2:
+  83              		.loc 1 16 9 view .LVU9
+  84              	.LVL4:
+  85              		.loc 1 16 13 is_stmt 0 view .LVU10
+  86 0038 0722     		movs	r2, #7
+  87              		.loc 1 16 5 view .LVU11
+  88 003a 0CE0     		b	.L2
+  89              	.LVL5:
+  90              	.L3:
+  17:Core/Src/motor.c ****         MOTORCLK_LOW;
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 3
+
+
+  18:Core/Src/motor.c ****         if(latchState & (1 << i))
+  19:Core/Src/motor.c ****             // uart_send_string("Setting bit high\r\n");
+  20:Core/Src/motor.c ****             MOTORDATA_HIGH;
+  21:Core/Src/motor.c ****         else
+  22:Core/Src/motor.c ****             // uart_send_string("Setting bit low\r\n");
+  23:Core/Src/motor.c ****             MOTORDATA_LOW;
+  91              		.loc 1 23 13 is_stmt 1 view .LVU12
+  92 003c A021     		movs	r1, #160
+  93 003e C905     		lsls	r1, r1, #23
+  94 0040 4B69     		ldr	r3, [r1, #20]
+  95 0042 1748     		ldr	r0, .L7+16
+  96 0044 0340     		ands	r3, r0
+  97 0046 4B61     		str	r3, [r1, #20]
+  98              	.L4:
+  24:Core/Src/motor.c ****         MOTORCLK_HIGH;
+  99              		.loc 1 24 9 view .LVU13
+ 100 0048 1649     		ldr	r1, .L7+20
+ 101 004a 4869     		ldr	r0, [r1, #20]
+ 102 004c 8023     		movs	r3, #128
+ 103 004e DB00     		lsls	r3, r3, #3
+ 104 0050 0343     		orrs	r3, r0
+ 105 0052 4B61     		str	r3, [r1, #20]
+  16:Core/Src/motor.c ****     for(int i = 7; i >= 0; i--) {
+ 106              		.loc 1 16 29 discriminator 2 view .LVU14
+ 107 0054 013A     		subs	r2, r2, #1
+ 108              	.LVL6:
+ 109              	.L2:
+  16:Core/Src/motor.c ****     for(int i = 7; i >= 0; i--) {
+ 110              		.loc 1 16 22 discriminator 1 view .LVU15
+ 111 0056 002A     		cmp	r2, #0
+ 112 0058 11DB     		blt	.L6
+  17:Core/Src/motor.c ****         MOTORCLK_LOW;
+ 113              		.loc 1 17 9 view .LVU16
+ 114 005a 1249     		ldr	r1, .L7+20
+ 115 005c 4B69     		ldr	r3, [r1, #20]
+ 116 005e 1248     		ldr	r0, .L7+24
+ 117 0060 0340     		ands	r3, r0
+ 118 0062 4B61     		str	r3, [r1, #20]
+  18:Core/Src/motor.c ****             // uart_send_string("Setting bit high\r\n");
+ 119              		.loc 1 18 9 view .LVU17
+  18:Core/Src/motor.c ****             // uart_send_string("Setting bit high\r\n");
+ 120              		.loc 1 18 12 is_stmt 0 view .LVU18
+ 121 0064 0C4B     		ldr	r3, .L7+8
+ 122 0066 1B78     		ldrb	r3, [r3]
+ 123 0068 1341     		asrs	r3, r3, r2
+  18:Core/Src/motor.c ****             // uart_send_string("Setting bit high\r\n");
+ 124              		.loc 1 18 11 view .LVU19
+ 125 006a DB07     		lsls	r3, r3, #31
+ 126 006c E6D5     		bpl	.L3
+  20:Core/Src/motor.c ****         else
+ 127              		.loc 1 20 13 is_stmt 1 view .LVU20
+ 128 006e A021     		movs	r1, #160
+ 129 0070 C905     		lsls	r1, r1, #23
+ 130 0072 4869     		ldr	r0, [r1, #20]
+ 131 0074 8023     		movs	r3, #128
+ 132 0076 9B00     		lsls	r3, r3, #2
+ 133 0078 0343     		orrs	r3, r0
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 4
+
+
+ 134 007a 4B61     		str	r3, [r1, #20]
+ 135 007c E4E7     		b	.L4
+ 136              	.L6:
+ 137              	.LBE2:
+  25:Core/Src/motor.c ****     }
+  26:Core/Src/motor.c ****     MOTORLATCH_HIGH;
+ 138              		.loc 1 26 5 view .LVU21
+ 139 007e A022     		movs	r2, #160
+ 140              	.LVL7:
+ 141              		.loc 1 26 5 is_stmt 0 view .LVU22
+ 142 0080 D205     		lsls	r2, r2, #23
+ 143 0082 5369     		ldr	r3, [r2, #20]
+ 144 0084 4021     		movs	r1, #64
+ 145 0086 0B43     		orrs	r3, r1
+ 146 0088 5361     		str	r3, [r2, #20]
+  27:Core/Src/motor.c **** }
+ 147              		.loc 1 27 1 view .LVU23
+ 148 008a 04B0     		add	sp, sp, #16
+ 149              		@ sp needed
+ 150 008c 10BD     		pop	{r4, pc}
+ 151              	.L8:
+ 152 008e C046     		.align	2
+ 153              	.L7:
+ 154 0090 00000000 		.word	.LC0
+ 155 0094 1C000000 		.word	.LC2
+ 156 0098 00000000 		.word	latchState
+ 157 009c 2C000000 		.word	.LC5
+ 158 00a0 FFFDFFFF 		.word	-513
+ 159 00a4 00040050 		.word	1342178304
+ 160 00a8 FFFBFFFF 		.word	-1025
+ 161              		.cfi_endproc
+ 162              	.LFE217:
+ 164              		.section	.text.setPWM,"ax",%progbits
+ 165              		.align	1
+ 166              		.global	setPWM
+ 167              		.syntax unified
+ 168              		.code	16
+ 169              		.thumb_func
+ 171              	setPWM:
+ 172              	.LVL8:
+ 173              	.LFB220:
+  28:Core/Src/motor.c **** 
+  29:Core/Src/motor.c **** void initPWM(uint8_t freq) {
+  30:Core/Src/motor.c ****     /* FRONT LEFT */
+  31:Core/Src/motor.c ****     // PA7 - GPIOA enabled in motor_init
+  32:Core/Src/motor.c ****     GPIOA->MODER &= ~GPIO_MODER_MODE7_Msk;
+  33:Core/Src/motor.c ****     GPIOA->MODER |= GPIO_MODER_MODE7_1; // set to alternate
+  34:Core/Src/motor.c ****     GPIOA->AFR[0] &= ~GPIO_AFRL_AFSEL7_Msk;
+  35:Core/Src/motor.c ****     GPIOA->AFR[0] |= GPIO_AFRL_AFSEL7_2; // set to AF4 (100)
+  36:Core/Src/motor.c **** 
+  37:Core/Src/motor.c ****     // TIM14 C1
+  38:Core/Src/motor.c ****     RCC->APBENR2 |= RCC_APBENR2_TIM14EN;
+  39:Core/Src/motor.c ****     TIM14->PSC = 47;
+  40:Core/Src/motor.c ****     TIM14->ARR = 999;
+  41:Core/Src/motor.c ****     TIM14->CCMR1 &= ~TIM_CCMR1_OC1M_Msk;
+  42:Core/Src/motor.c ****     TIM14->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // set to PWM mode 1 (110)
+  43:Core/Src/motor.c ****     TIM14->CCMR1 |= TIM_CCMR1_OC1PE; // enable preload
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 5
+
+
+  44:Core/Src/motor.c ****     TIM14->CCER |= TIM_CCER_CC1E; // enable output
+  45:Core/Src/motor.c ****     // TIM14->CCR1 = (freq * TIM14->ARR) / 255; // set duty cycle
+  46:Core/Src/motor.c ****     setPWM(FRONT_LEFT, freq);
+  47:Core/Src/motor.c ****     
+  48:Core/Src/motor.c ****     /* FRONT RIGHT */ 
+  49:Core/Src/motor.c ****     // PB3 
+  50:Core/Src/motor.c ****     GPIOB->MODER &= ~GPIO_MODER_MODE3_Msk;
+  51:Core/Src/motor.c ****     GPIOB->MODER |= GPIO_MODER_MODE3_1; // alternate
+  52:Core/Src/motor.c ****     GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL3_Msk;
+  53:Core/Src/motor.c ****     GPIOB->AFR[0] |= GPIO_AFRL_AFSEL3_0 | GPIO_AFRL_AFSEL3_1;
+  54:Core/Src/motor.c **** 
+  55:Core/Src/motor.c ****     // TIM3
+  56:Core/Src/motor.c ****     RCC->APBENR1 |= RCC_APBENR1_TIM3EN;
+  57:Core/Src/motor.c ****     TIM3->PSC = 47;
+  58:Core/Src/motor.c ****     TIM3->ARR = 999;
+  59:Core/Src/motor.c **** 
+  60:Core/Src/motor.c ****     // TIM3 C2
+  61:Core/Src/motor.c ****     TIM3->CCMR1 &= ~TIM_CCMR1_OC2M_Msk;
+  62:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2; // PWM M1
+  63:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC2PE;
+  64:Core/Src/motor.c ****     TIM3->CCER |= TIM_CCER_CC2E;
+  65:Core/Src/motor.c ****     // TIM3->CCR2 = (freq * TIM3->ARR) / 255;
+  66:Core/Src/motor.c ****     setPWM(FRONT_RIGHT, freq);
+  67:Core/Src/motor.c ****     
+  68:Core/Src/motor.c ****     /* BACK LEFT */
+  69:Core/Src/motor.c ****     // PB4 
+  70:Core/Src/motor.c ****     GPIOB->MODER &= ~GPIO_MODER_MODE4_Msk;
+  71:Core/Src/motor.c ****     GPIOB->MODER |= GPIO_MODER_MODE4_1; // alternate
+  72:Core/Src/motor.c ****     GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL4_Msk;
+  73:Core/Src/motor.c ****     GPIOB->AFR[0] |= GPIO_AFRL_AFSEL4_0; // AF1
+  74:Core/Src/motor.c **** 
+  75:Core/Src/motor.c ****     // TIM3 C1
+  76:Core/Src/motor.c ****     TIM3->CCMR1 &= ~TIM_CCMR1_OC1M_Msk;
+  77:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // PWM M1
+  78:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC1PE;
+  79:Core/Src/motor.c ****     TIM3->CCER |= TIM_CCER_CC1E;
+  80:Core/Src/motor.c ****     // TIM3->CCR1 = (freq * TIM3->ARR) / 255;
+  81:Core/Src/motor.c ****     setPWM(BACK_LEFT, freq);
+  82:Core/Src/motor.c ****     
+  83:Core/Src/motor.c ****     /* BACK RIGHT */
+  84:Core/Src/motor.c ****     // PB5 
+  85:Core/Src/motor.c ****     GPIOB->MODER &= ~GPIO_MODER_MODE5_Msk;
+  86:Core/Src/motor.c ****     GPIOB->MODER |= GPIO_MODER_MODE5_1; // alternate
+  87:Core/Src/motor.c ****     GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL5_Msk;
+  88:Core/Src/motor.c ****     GPIOB->AFR[0] |= GPIO_AFRL_AFSEL5_0 | GPIO_AFRL_AFSEL5_1; // AF3
+  89:Core/Src/motor.c **** 
+  90:Core/Src/motor.c ****     // TIM3 C3
+  91:Core/Src/motor.c ****     TIM3->CCMR2 &= ~TIM_CCMR2_OC3M_Msk;
+  92:Core/Src/motor.c ****     TIM3->CCMR2 |= TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2; // PWM M1
+  93:Core/Src/motor.c ****     TIM3->CCMR2 |= TIM_CCMR2_OC3PE;
+  94:Core/Src/motor.c ****     TIM3->CCER |= TIM_CCER_CC3E;
+  95:Core/Src/motor.c ****     // TIM3->CCR3 = (freq * TIM3->ARR) / 255;
+  96:Core/Src/motor.c ****     setPWM(BACK_RIGHT, freq);
+  97:Core/Src/motor.c **** 
+  98:Core/Src/motor.c ****     // Timer Enables
+  99:Core/Src/motor.c ****     TIM14->CR1 |= TIM_CR1_CEN; 
+ 100:Core/Src/motor.c ****     TIM3->CR1 |= TIM_CR1_CEN; 
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 6
+
+
+ 101:Core/Src/motor.c **** }
+ 102:Core/Src/motor.c **** 
+ 103:Core/Src/motor.c **** void initMotor() {
+ 104:Core/Src/motor.c ****     uart_send_string("Initializing motors\r\n");
+ 105:Core/Src/motor.c ****     
+ 106:Core/Src/motor.c ****     RCC->IOPENR |= RCC_IOPENR_GPIOAEN; // latch and data
+ 107:Core/Src/motor.c ****     RCC->IOPENR |= RCC_IOPENR_GPIOBEN; // clock
+ 108:Core/Src/motor.c **** 
+ 109:Core/Src/motor.c ****     MOTORENABLE_PORT->MODER &= ~GPIO_MODER_MODE15_Msk;
+ 110:Core/Src/motor.c ****     MOTORENABLE_PORT->MODER |= GPIO_MODER_MODE15_0;
+ 111:Core/Src/motor.c ****     // MOTORENABLE_LOW;  // pull low to enable motors
+ 112:Core/Src/motor.c ****     MOTORENABLE_HIGH;  // pull low to enable motors
+ 113:Core/Src/motor.c **** 
+ 114:Core/Src/motor.c ****     MOTORLATCH_PORT->MODER &= ~GPIO_MODER_MODE6_Msk;
+ 115:Core/Src/motor.c ****     MOTORLATCH_PORT->MODER |= GPIO_MODER_MODE6_0;
+ 116:Core/Src/motor.c **** 
+ 117:Core/Src/motor.c ****     MOTORDATA_PORT->MODER &= ~GPIO_MODER_MODE9_Msk;
+ 118:Core/Src/motor.c ****     MOTORDATA_PORT->MODER |= GPIO_MODER_MODE9_0;
+ 119:Core/Src/motor.c **** 
+ 120:Core/Src/motor.c ****     MOTORCLK_PORT->MODER &= ~GPIO_MODER_MODE10_Msk;
+ 121:Core/Src/motor.c ****     MOTORCLK_PORT->MODER |= GPIO_MODER_MODE10_0;
+ 122:Core/Src/motor.c **** 
+ 123:Core/Src/motor.c ****     latchState = 0;
+ 124:Core/Src/motor.c ****     txLatch();
+ 125:Core/Src/motor.c **** 
+ 126:Core/Src/motor.c ****     for(int pos = 0; pos < 4; pos++) {
+ 127:Core/Src/motor.c ****         Motor *m = &motors[pos];
+ 128:Core/Src/motor.c ****         m->motornum = pos;
+ 129:Core/Src/motor.c ****         switch(pos) {
+ 130:Core/Src/motor.c ****             case FRONT_LEFT:
+ 131:Core/Src/motor.c ****                 latchState &= ~(1 << MOTOR1_A) & ~(1 << MOTOR1_B);
+ 132:Core/Src/motor.c ****                 break;
+ 133:Core/Src/motor.c ****             case FRONT_RIGHT:
+ 134:Core/Src/motor.c ****                 latchState &= ~(1 << MOTOR2_A) & ~(1 << MOTOR2_B);
+ 135:Core/Src/motor.c ****                 break;
+ 136:Core/Src/motor.c ****             case BACK_LEFT:
+ 137:Core/Src/motor.c ****                 latchState &= ~(1 << MOTOR3_A) & ~(1 << MOTOR3_B);
+ 138:Core/Src/motor.c ****                 break;
+ 139:Core/Src/motor.c ****             case BACK_RIGHT: 
+ 140:Core/Src/motor.c ****                 latchState &= ~(1 << MOTOR4_A) & ~(1 << MOTOR4_B);
+ 141:Core/Src/motor.c ****                 break;
+ 142:Core/Src/motor.c ****         }
+ 143:Core/Src/motor.c ****     }
+ 144:Core/Src/motor.c ****     txLatch();
+ 145:Core/Src/motor.c ****     initPWM(DEFAULT_FREQ);
+ 146:Core/Src/motor.c **** }
+ 147:Core/Src/motor.c **** 
+ 148:Core/Src/motor.c **** 
+ 149:Core/Src/motor.c **** void setPWM(enum motor_pos pos, uint8_t freq) {
+ 174              		.loc 1 149 47 is_stmt 1 view -0
+ 175              		.cfi_startproc
+ 176              		@ args = 0, pretend = 0, frame = 0
+ 177              		@ frame_needed = 0, uses_anonymous_args = 0
+ 178              		.loc 1 149 47 is_stmt 0 view .LVU25
+ 179 0000 10B5     		push	{r4, lr}
+ 180              	.LCFI2:
+ 181              		.cfi_def_cfa_offset 8
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 7
+
+
+ 182              		.cfi_offset 4, -8
+ 183              		.cfi_offset 14, -4
+ 150:Core/Src/motor.c ****     switch(pos) {
+ 184              		.loc 1 150 5 is_stmt 1 view .LVU26
+ 185 0002 0228     		cmp	r0, #2
+ 186 0004 1ED0     		beq	.L10
+ 187 0006 0BD8     		bhi	.L11
+ 188 0008 0028     		cmp	r0, #0
+ 189 000a 13D0     		beq	.L12
+ 190 000c 0128     		cmp	r0, #1
+ 191 000e 18D1     		bne	.L9
+ 151:Core/Src/motor.c ****         case FRONT_LEFT:
+ 152:Core/Src/motor.c ****             TIM14->CCR1 = (freq * TIM14->ARR) / 255; break;
+ 153:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 154:Core/Src/motor.c ****             TIM3->CCR2 = (freq * TIM3->ARR) / 255; break;
+ 192              		.loc 1 154 13 view .LVU27
+ 193              		.loc 1 154 38 is_stmt 0 view .LVU28
+ 194 0010 104C     		ldr	r4, .L16
+ 195 0012 E06A     		ldr	r0, [r4, #44]
+ 196              	.LVL9:
+ 197              		.loc 1 154 32 view .LVU29
+ 198 0014 4843     		muls	r0, r1
+ 199              		.loc 1 154 45 view .LVU30
+ 200 0016 FF21     		movs	r1, #255
+ 201              	.LVL10:
+ 202              		.loc 1 154 45 view .LVU31
+ 203 0018 FFF7FEFF 		bl	__aeabi_uidiv
+ 204              	.LVL11:
+ 205              		.loc 1 154 24 view .LVU32
+ 206 001c A063     		str	r0, [r4, #56]
+ 207              		.loc 1 154 52 is_stmt 1 view .LVU33
+ 208 001e 10E0     		b	.L9
+ 209              	.LVL12:
+ 210              	.L11:
+ 150:Core/Src/motor.c ****     switch(pos) {
+ 211              		.loc 1 150 5 is_stmt 0 view .LVU34
+ 212 0020 0328     		cmp	r0, #3
+ 213 0022 0ED1     		bne	.L9
+ 155:Core/Src/motor.c ****         case BACK_LEFT:
+ 156:Core/Src/motor.c ****             TIM3->CCR1 = (freq * TIM3->ARR) / 255; break;
+ 157:Core/Src/motor.c ****         case BACK_RIGHT: 
+ 158:Core/Src/motor.c ****             TIM3->CCR3 = (freq * TIM3->ARR) / 255;break;
+ 214              		.loc 1 158 13 is_stmt 1 view .LVU35
+ 215              		.loc 1 158 38 is_stmt 0 view .LVU36
+ 216 0024 0B4C     		ldr	r4, .L16
+ 217 0026 E06A     		ldr	r0, [r4, #44]
+ 218              	.LVL13:
+ 219              		.loc 1 158 32 view .LVU37
+ 220 0028 4843     		muls	r0, r1
+ 221              		.loc 1 158 45 view .LVU38
+ 222 002a FF21     		movs	r1, #255
+ 223              	.LVL14:
+ 224              		.loc 1 158 45 view .LVU39
+ 225 002c FFF7FEFF 		bl	__aeabi_uidiv
+ 226              	.LVL15:
+ 227              		.loc 1 158 24 view .LVU40
+ 228 0030 E063     		str	r0, [r4, #60]
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 8
+
+
+ 229              		.loc 1 158 51 is_stmt 1 view .LVU41
+ 159:Core/Src/motor.c ****     }
+ 160:Core/Src/motor.c **** }
+ 230              		.loc 1 160 1 is_stmt 0 view .LVU42
+ 231 0032 06E0     		b	.L9
+ 232              	.LVL16:
+ 233              	.L12:
+ 152:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 234              		.loc 1 152 13 is_stmt 1 view .LVU43
+ 152:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 235              		.loc 1 152 40 is_stmt 0 view .LVU44
+ 236 0034 084C     		ldr	r4, .L16+4
+ 237 0036 E06A     		ldr	r0, [r4, #44]
+ 238              	.LVL17:
+ 152:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 239              		.loc 1 152 33 view .LVU45
+ 240 0038 4843     		muls	r0, r1
+ 152:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 241              		.loc 1 152 47 view .LVU46
+ 242 003a FF21     		movs	r1, #255
+ 243              	.LVL18:
+ 152:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 244              		.loc 1 152 47 view .LVU47
+ 245 003c FFF7FEFF 		bl	__aeabi_uidiv
+ 246              	.LVL19:
+ 152:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 247              		.loc 1 152 25 view .LVU48
+ 248 0040 6063     		str	r0, [r4, #52]
+ 152:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 249              		.loc 1 152 54 is_stmt 1 view .LVU49
+ 250              	.L9:
+ 251              		.loc 1 160 1 is_stmt 0 view .LVU50
+ 252              		@ sp needed
+ 253 0042 10BD     		pop	{r4, pc}
+ 254              	.LVL20:
+ 255              	.L10:
+ 156:Core/Src/motor.c ****         case BACK_RIGHT: 
+ 256              		.loc 1 156 13 is_stmt 1 view .LVU51
+ 156:Core/Src/motor.c ****         case BACK_RIGHT: 
+ 257              		.loc 1 156 38 is_stmt 0 view .LVU52
+ 258 0044 034C     		ldr	r4, .L16
+ 259 0046 E06A     		ldr	r0, [r4, #44]
+ 260              	.LVL21:
+ 156:Core/Src/motor.c ****         case BACK_RIGHT: 
+ 261              		.loc 1 156 32 view .LVU53
+ 262 0048 4843     		muls	r0, r1
+ 156:Core/Src/motor.c ****         case BACK_RIGHT: 
+ 263              		.loc 1 156 45 view .LVU54
+ 264 004a FF21     		movs	r1, #255
+ 265              	.LVL22:
+ 156:Core/Src/motor.c ****         case BACK_RIGHT: 
+ 266              		.loc 1 156 45 view .LVU55
+ 267 004c FFF7FEFF 		bl	__aeabi_uidiv
+ 268              	.LVL23:
+ 156:Core/Src/motor.c ****         case BACK_RIGHT: 
+ 269              		.loc 1 156 24 view .LVU56
+ 270 0050 6063     		str	r0, [r4, #52]
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 9
+
+
+ 156:Core/Src/motor.c ****         case BACK_RIGHT: 
+ 271              		.loc 1 156 52 is_stmt 1 view .LVU57
+ 272 0052 F6E7     		b	.L9
+ 273              	.L17:
+ 274              		.align	2
+ 275              	.L16:
+ 276 0054 00040040 		.word	1073742848
+ 277 0058 00200040 		.word	1073750016
+ 278              		.cfi_endproc
+ 279              	.LFE220:
+ 281              		.section	.text.initPWM,"ax",%progbits
+ 282              		.align	1
+ 283              		.global	initPWM
+ 284              		.syntax unified
+ 285              		.code	16
+ 286              		.thumb_func
+ 288              	initPWM:
+ 289              	.LVL24:
+ 290              	.LFB218:
+  29:Core/Src/motor.c ****     /* FRONT LEFT */
+ 291              		.loc 1 29 28 view -0
+ 292              		.cfi_startproc
+ 293              		@ args = 0, pretend = 0, frame = 0
+ 294              		@ frame_needed = 0, uses_anonymous_args = 0
+  29:Core/Src/motor.c ****     /* FRONT LEFT */
+ 295              		.loc 1 29 28 is_stmt 0 view .LVU59
+ 296 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 297              	.LCFI3:
+ 298              		.cfi_def_cfa_offset 24
+ 299              		.cfi_offset 3, -24
+ 300              		.cfi_offset 4, -20
+ 301              		.cfi_offset 5, -16
+ 302              		.cfi_offset 6, -12
+ 303              		.cfi_offset 7, -8
+ 304              		.cfi_offset 14, -4
+ 305 0002 DE46     		mov	lr, fp
+ 306 0004 5746     		mov	r7, r10
+ 307 0006 4E46     		mov	r6, r9
+ 308 0008 4546     		mov	r5, r8
+ 309 000a E0B5     		push	{r5, r6, r7, lr}
+ 310              	.LCFI4:
+ 311              		.cfi_def_cfa_offset 40
+ 312              		.cfi_offset 8, -40
+ 313              		.cfi_offset 9, -36
+ 314              		.cfi_offset 10, -32
+ 315              		.cfi_offset 11, -28
+ 316 000c 0700     		movs	r7, r0
+  32:Core/Src/motor.c ****     GPIOA->MODER |= GPIO_MODER_MODE7_1; // set to alternate
+ 317              		.loc 1 32 5 is_stmt 1 view .LVU60
+  32:Core/Src/motor.c ****     GPIOA->MODER |= GPIO_MODER_MODE7_1; // set to alternate
+ 318              		.loc 1 32 10 is_stmt 0 view .LVU61
+ 319 000e A023     		movs	r3, #160
+ 320 0010 DB05     		lsls	r3, r3, #23
+ 321 0012 1A68     		ldr	r2, [r3]
+  32:Core/Src/motor.c ****     GPIOA->MODER |= GPIO_MODER_MODE7_1; // set to alternate
+ 322              		.loc 1 32 18 view .LVU62
+ 323 0014 5E49     		ldr	r1, .L19
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 10
+
+
+ 324 0016 0A40     		ands	r2, r1
+ 325 0018 1A60     		str	r2, [r3]
+  33:Core/Src/motor.c ****     GPIOA->AFR[0] &= ~GPIO_AFRL_AFSEL7_Msk;
+ 326              		.loc 1 33 5 is_stmt 1 view .LVU63
+  33:Core/Src/motor.c ****     GPIOA->AFR[0] &= ~GPIO_AFRL_AFSEL7_Msk;
+ 327              		.loc 1 33 10 is_stmt 0 view .LVU64
+ 328 001a 1A68     		ldr	r2, [r3]
+  33:Core/Src/motor.c ****     GPIOA->AFR[0] &= ~GPIO_AFRL_AFSEL7_Msk;
+ 329              		.loc 1 33 18 view .LVU65
+ 330 001c 8021     		movs	r1, #128
+ 331 001e 0902     		lsls	r1, r1, #8
+ 332 0020 0A43     		orrs	r2, r1
+ 333 0022 1A60     		str	r2, [r3]
+  34:Core/Src/motor.c ****     GPIOA->AFR[0] |= GPIO_AFRL_AFSEL7_2; // set to AF4 (100)
+ 334              		.loc 1 34 5 is_stmt 1 view .LVU66
+  34:Core/Src/motor.c ****     GPIOA->AFR[0] |= GPIO_AFRL_AFSEL7_2; // set to AF4 (100)
+ 335              		.loc 1 34 15 is_stmt 0 view .LVU67
+ 336 0024 1A6A     		ldr	r2, [r3, #32]
+  34:Core/Src/motor.c ****     GPIOA->AFR[0] |= GPIO_AFRL_AFSEL7_2; // set to AF4 (100)
+ 337              		.loc 1 34 19 view .LVU68
+ 338 0026 1201     		lsls	r2, r2, #4
+ 339 0028 1209     		lsrs	r2, r2, #4
+ 340 002a 1A62     		str	r2, [r3, #32]
+  35:Core/Src/motor.c **** 
+ 341              		.loc 1 35 5 is_stmt 1 view .LVU69
+  35:Core/Src/motor.c **** 
+ 342              		.loc 1 35 15 is_stmt 0 view .LVU70
+ 343 002c 186A     		ldr	r0, [r3, #32]
+ 344              	.LVL25:
+  35:Core/Src/motor.c **** 
+ 345              		.loc 1 35 19 view .LVU71
+ 346 002e 8022     		movs	r2, #128
+ 347 0030 D205     		lsls	r2, r2, #23
+ 348 0032 0243     		orrs	r2, r0
+ 349 0034 1A62     		str	r2, [r3, #32]
+  38:Core/Src/motor.c ****     TIM14->PSC = 47;
+ 350              		.loc 1 38 5 is_stmt 1 view .LVU72
+  38:Core/Src/motor.c ****     TIM14->PSC = 47;
+ 351              		.loc 1 38 8 is_stmt 0 view .LVU73
+ 352 0036 574C     		ldr	r4, .L19+4
+ 353 0038 236C     		ldr	r3, [r4, #64]
+  38:Core/Src/motor.c ****     TIM14->PSC = 47;
+ 354              		.loc 1 38 18 view .LVU74
+ 355 003a 1943     		orrs	r1, r3
+ 356 003c 2164     		str	r1, [r4, #64]
+  39:Core/Src/motor.c ****     TIM14->ARR = 999;
+ 357              		.loc 1 39 5 is_stmt 1 view .LVU75
+  39:Core/Src/motor.c ****     TIM14->ARR = 999;
+ 358              		.loc 1 39 16 is_stmt 0 view .LVU76
+ 359 003e 564E     		ldr	r6, .L19+8
+ 360 0040 2F23     		movs	r3, #47
+ 361 0042 B362     		str	r3, [r6, #40]
+  40:Core/Src/motor.c ****     TIM14->CCMR1 &= ~TIM_CCMR1_OC1M_Msk;
+ 362              		.loc 1 40 5 is_stmt 1 view .LVU77
+  40:Core/Src/motor.c ****     TIM14->CCMR1 &= ~TIM_CCMR1_OC1M_Msk;
+ 363              		.loc 1 40 16 is_stmt 0 view .LVU78
+ 364 0044 554A     		ldr	r2, .L19+12
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 11
+
+
+ 365 0046 F262     		str	r2, [r6, #44]
+  41:Core/Src/motor.c ****     TIM14->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // set to PWM mode 1 (110)
+ 366              		.loc 1 41 5 is_stmt 1 view .LVU79
+  41:Core/Src/motor.c ****     TIM14->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // set to PWM mode 1 (110)
+ 367              		.loc 1 41 10 is_stmt 0 view .LVU80
+ 368 0048 B369     		ldr	r3, [r6, #24]
+  41:Core/Src/motor.c ****     TIM14->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // set to PWM mode 1 (110)
+ 369              		.loc 1 41 18 view .LVU81
+ 370 004a 5549     		ldr	r1, .L19+16
+ 371 004c 8B46     		mov	fp, r1
+ 372 004e 0B40     		ands	r3, r1
+ 373 0050 B361     		str	r3, [r6, #24]
+  42:Core/Src/motor.c ****     TIM14->CCMR1 |= TIM_CCMR1_OC1PE; // enable preload
+ 374              		.loc 1 42 5 is_stmt 1 view .LVU82
+  42:Core/Src/motor.c ****     TIM14->CCMR1 |= TIM_CCMR1_OC1PE; // enable preload
+ 375              		.loc 1 42 10 is_stmt 0 view .LVU83
+ 376 0052 B369     		ldr	r3, [r6, #24]
+  42:Core/Src/motor.c ****     TIM14->CCMR1 |= TIM_CCMR1_OC1PE; // enable preload
+ 377              		.loc 1 42 18 view .LVU84
+ 378 0054 6021     		movs	r1, #96
+ 379 0056 8A46     		mov	r10, r1
+ 380 0058 0B43     		orrs	r3, r1
+ 381 005a B361     		str	r3, [r6, #24]
+  43:Core/Src/motor.c ****     TIM14->CCER |= TIM_CCER_CC1E; // enable output
+ 382              		.loc 1 43 5 is_stmt 1 view .LVU85
+  43:Core/Src/motor.c ****     TIM14->CCER |= TIM_CCER_CC1E; // enable output
+ 383              		.loc 1 43 10 is_stmt 0 view .LVU86
+ 384 005c B369     		ldr	r3, [r6, #24]
+  43:Core/Src/motor.c ****     TIM14->CCER |= TIM_CCER_CC1E; // enable output
+ 385              		.loc 1 43 18 view .LVU87
+ 386 005e 5839     		subs	r1, r1, #88
+ 387 0060 8946     		mov	r9, r1
+ 388 0062 0B43     		orrs	r3, r1
+ 389 0064 B361     		str	r3, [r6, #24]
+  44:Core/Src/motor.c ****     // TIM14->CCR1 = (freq * TIM14->ARR) / 255; // set duty cycle
+ 390              		.loc 1 44 5 is_stmt 1 view .LVU88
+  44:Core/Src/motor.c ****     // TIM14->CCR1 = (freq * TIM14->ARR) / 255; // set duty cycle
+ 391              		.loc 1 44 10 is_stmt 0 view .LVU89
+ 392 0066 336A     		ldr	r3, [r6, #32]
+  44:Core/Src/motor.c ****     // TIM14->CCR1 = (freq * TIM14->ARR) / 255; // set duty cycle
+ 393              		.loc 1 44 17 view .LVU90
+ 394 0068 0739     		subs	r1, r1, #7
+ 395 006a 8846     		mov	r8, r1
+ 396 006c 0B43     		orrs	r3, r1
+ 397 006e 3362     		str	r3, [r6, #32]
+  46:Core/Src/motor.c ****     
+ 398              		.loc 1 46 5 is_stmt 1 view .LVU91
+ 399 0070 3900     		movs	r1, r7
+ 400 0072 0020     		movs	r0, #0
+ 401 0074 FFF7FEFF 		bl	setPWM
+ 402              	.LVL26:
+  50:Core/Src/motor.c ****     GPIOB->MODER |= GPIO_MODER_MODE3_1; // alternate
+ 403              		.loc 1 50 5 view .LVU92
+  50:Core/Src/motor.c ****     GPIOB->MODER |= GPIO_MODER_MODE3_1; // alternate
+ 404              		.loc 1 50 10 is_stmt 0 view .LVU93
+ 405 0078 4A4D     		ldr	r5, .L19+20
+ 406 007a 2B68     		ldr	r3, [r5]
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 12
+
+
+  50:Core/Src/motor.c ****     GPIOB->MODER |= GPIO_MODER_MODE3_1; // alternate
+ 407              		.loc 1 50 18 view .LVU94
+ 408 007c C022     		movs	r2, #192
+ 409 007e 9343     		bics	r3, r2
+ 410 0080 2B60     		str	r3, [r5]
+  51:Core/Src/motor.c ****     GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL3_Msk;
+ 411              		.loc 1 51 5 is_stmt 1 view .LVU95
+  51:Core/Src/motor.c ****     GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL3_Msk;
+ 412              		.loc 1 51 10 is_stmt 0 view .LVU96
+ 413 0082 2B68     		ldr	r3, [r5]
+  51:Core/Src/motor.c ****     GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL3_Msk;
+ 414              		.loc 1 51 18 view .LVU97
+ 415 0084 403A     		subs	r2, r2, #64
+ 416 0086 1343     		orrs	r3, r2
+ 417 0088 2B60     		str	r3, [r5]
+  52:Core/Src/motor.c ****     GPIOB->AFR[0] |= GPIO_AFRL_AFSEL3_0 | GPIO_AFRL_AFSEL3_1;
+ 418              		.loc 1 52 5 is_stmt 1 view .LVU98
+  52:Core/Src/motor.c ****     GPIOB->AFR[0] |= GPIO_AFRL_AFSEL3_0 | GPIO_AFRL_AFSEL3_1;
+ 419              		.loc 1 52 15 is_stmt 0 view .LVU99
+ 420 008a 2B6A     		ldr	r3, [r5, #32]
+  52:Core/Src/motor.c ****     GPIOB->AFR[0] |= GPIO_AFRL_AFSEL3_0 | GPIO_AFRL_AFSEL3_1;
+ 421              		.loc 1 52 19 view .LVU100
+ 422 008c 464A     		ldr	r2, .L19+24
+ 423 008e 1340     		ands	r3, r2
+ 424 0090 2B62     		str	r3, [r5, #32]
+  53:Core/Src/motor.c **** 
+ 425              		.loc 1 53 5 is_stmt 1 view .LVU101
+  53:Core/Src/motor.c **** 
+ 426              		.loc 1 53 15 is_stmt 0 view .LVU102
+ 427 0092 2A6A     		ldr	r2, [r5, #32]
+  53:Core/Src/motor.c **** 
+ 428              		.loc 1 53 19 view .LVU103
+ 429 0094 C023     		movs	r3, #192
+ 430 0096 9B01     		lsls	r3, r3, #6
+ 431 0098 1343     		orrs	r3, r2
+ 432 009a 2B62     		str	r3, [r5, #32]
+  56:Core/Src/motor.c ****     TIM3->PSC = 47;
+ 433              		.loc 1 56 5 is_stmt 1 view .LVU104
+  56:Core/Src/motor.c ****     TIM3->PSC = 47;
+ 434              		.loc 1 56 8 is_stmt 0 view .LVU105
+ 435 009c E36B     		ldr	r3, [r4, #60]
+  56:Core/Src/motor.c ****     TIM3->PSC = 47;
+ 436              		.loc 1 56 18 view .LVU106
+ 437 009e 0222     		movs	r2, #2
+ 438 00a0 1343     		orrs	r3, r2
+ 439 00a2 E363     		str	r3, [r4, #60]
+  57:Core/Src/motor.c ****     TIM3->ARR = 999;
+ 440              		.loc 1 57 5 is_stmt 1 view .LVU107
+  57:Core/Src/motor.c ****     TIM3->ARR = 999;
+ 441              		.loc 1 57 15 is_stmt 0 view .LVU108
+ 442 00a4 414C     		ldr	r4, .L19+28
+ 443 00a6 2F23     		movs	r3, #47
+ 444 00a8 A362     		str	r3, [r4, #40]
+  58:Core/Src/motor.c **** 
+ 445              		.loc 1 58 5 is_stmt 1 view .LVU109
+  58:Core/Src/motor.c **** 
+ 446              		.loc 1 58 15 is_stmt 0 view .LVU110
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 13
+
+
+ 447 00aa 3C4A     		ldr	r2, .L19+12
+ 448 00ac E262     		str	r2, [r4, #44]
+  61:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2; // PWM M1
+ 449              		.loc 1 61 5 is_stmt 1 view .LVU111
+  61:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2; // PWM M1
+ 450              		.loc 1 61 9 is_stmt 0 view .LVU112
+ 451 00ae A369     		ldr	r3, [r4, #24]
+  61:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2; // PWM M1
+ 452              		.loc 1 61 17 view .LVU113
+ 453 00b0 3F4A     		ldr	r2, .L19+32
+ 454 00b2 1340     		ands	r3, r2
+ 455 00b4 A361     		str	r3, [r4, #24]
+  62:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC2PE;
+ 456              		.loc 1 62 5 is_stmt 1 view .LVU114
+  62:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC2PE;
+ 457              		.loc 1 62 9 is_stmt 0 view .LVU115
+ 458 00b6 A269     		ldr	r2, [r4, #24]
+  62:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC2PE;
+ 459              		.loc 1 62 17 view .LVU116
+ 460 00b8 C023     		movs	r3, #192
+ 461 00ba DB01     		lsls	r3, r3, #7
+ 462 00bc 1343     		orrs	r3, r2
+ 463 00be A361     		str	r3, [r4, #24]
+  63:Core/Src/motor.c ****     TIM3->CCER |= TIM_CCER_CC2E;
+ 464              		.loc 1 63 5 is_stmt 1 view .LVU117
+  63:Core/Src/motor.c ****     TIM3->CCER |= TIM_CCER_CC2E;
+ 465              		.loc 1 63 9 is_stmt 0 view .LVU118
+ 466 00c0 A369     		ldr	r3, [r4, #24]
+  63:Core/Src/motor.c ****     TIM3->CCER |= TIM_CCER_CC2E;
+ 467              		.loc 1 63 17 view .LVU119
+ 468 00c2 8022     		movs	r2, #128
+ 469 00c4 1201     		lsls	r2, r2, #4
+ 470 00c6 1343     		orrs	r3, r2
+ 471 00c8 A361     		str	r3, [r4, #24]
+  64:Core/Src/motor.c ****     // TIM3->CCR2 = (freq * TIM3->ARR) / 255;
+ 472              		.loc 1 64 5 is_stmt 1 view .LVU120
+  64:Core/Src/motor.c ****     // TIM3->CCR2 = (freq * TIM3->ARR) / 255;
+ 473              		.loc 1 64 9 is_stmt 0 view .LVU121
+ 474 00ca 236A     		ldr	r3, [r4, #32]
+  64:Core/Src/motor.c ****     // TIM3->CCR2 = (freq * TIM3->ARR) / 255;
+ 475              		.loc 1 64 16 view .LVU122
+ 476 00cc 1022     		movs	r2, #16
+ 477 00ce 1343     		orrs	r3, r2
+ 478 00d0 2362     		str	r3, [r4, #32]
+  66:Core/Src/motor.c ****     
+ 479              		.loc 1 66 5 is_stmt 1 view .LVU123
+ 480 00d2 3900     		movs	r1, r7
+ 481 00d4 0120     		movs	r0, #1
+ 482 00d6 FFF7FEFF 		bl	setPWM
+ 483              	.LVL27:
+  70:Core/Src/motor.c ****     GPIOB->MODER |= GPIO_MODER_MODE4_1; // alternate
+ 484              		.loc 1 70 5 view .LVU124
+  70:Core/Src/motor.c ****     GPIOB->MODER |= GPIO_MODER_MODE4_1; // alternate
+ 485              		.loc 1 70 10 is_stmt 0 view .LVU125
+ 486 00da 2B68     		ldr	r3, [r5]
+  70:Core/Src/motor.c ****     GPIOB->MODER |= GPIO_MODER_MODE4_1; // alternate
+ 487              		.loc 1 70 18 view .LVU126
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 14
+
+
+ 488 00dc 354A     		ldr	r2, .L19+36
+ 489 00de 1340     		ands	r3, r2
+ 490 00e0 2B60     		str	r3, [r5]
+  71:Core/Src/motor.c ****     GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL4_Msk;
+ 491              		.loc 1 71 5 is_stmt 1 view .LVU127
+  71:Core/Src/motor.c ****     GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL4_Msk;
+ 492              		.loc 1 71 10 is_stmt 0 view .LVU128
+ 493 00e2 2A68     		ldr	r2, [r5]
+  71:Core/Src/motor.c ****     GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL4_Msk;
+ 494              		.loc 1 71 18 view .LVU129
+ 495 00e4 8023     		movs	r3, #128
+ 496 00e6 9B00     		lsls	r3, r3, #2
+ 497 00e8 1343     		orrs	r3, r2
+ 498 00ea 2B60     		str	r3, [r5]
+  72:Core/Src/motor.c ****     GPIOB->AFR[0] |= GPIO_AFRL_AFSEL4_0; // AF1
+ 499              		.loc 1 72 5 is_stmt 1 view .LVU130
+  72:Core/Src/motor.c ****     GPIOB->AFR[0] |= GPIO_AFRL_AFSEL4_0; // AF1
+ 500              		.loc 1 72 15 is_stmt 0 view .LVU131
+ 501 00ec 2B6A     		ldr	r3, [r5, #32]
+  72:Core/Src/motor.c ****     GPIOB->AFR[0] |= GPIO_AFRL_AFSEL4_0; // AF1
+ 502              		.loc 1 72 19 view .LVU132
+ 503 00ee 324A     		ldr	r2, .L19+40
+ 504 00f0 1340     		ands	r3, r2
+ 505 00f2 2B62     		str	r3, [r5, #32]
+  73:Core/Src/motor.c **** 
+ 506              		.loc 1 73 5 is_stmt 1 view .LVU133
+  73:Core/Src/motor.c **** 
+ 507              		.loc 1 73 15 is_stmt 0 view .LVU134
+ 508 00f4 2A6A     		ldr	r2, [r5, #32]
+  73:Core/Src/motor.c **** 
+ 509              		.loc 1 73 19 view .LVU135
+ 510 00f6 8023     		movs	r3, #128
+ 511 00f8 5B02     		lsls	r3, r3, #9
+ 512 00fa 1343     		orrs	r3, r2
+ 513 00fc 2B62     		str	r3, [r5, #32]
+  76:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // PWM M1
+ 514              		.loc 1 76 5 is_stmt 1 view .LVU136
+  76:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // PWM M1
+ 515              		.loc 1 76 9 is_stmt 0 view .LVU137
+ 516 00fe A369     		ldr	r3, [r4, #24]
+  76:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // PWM M1
+ 517              		.loc 1 76 17 view .LVU138
+ 518 0100 5946     		mov	r1, fp
+ 519 0102 0B40     		ands	r3, r1
+ 520 0104 A361     		str	r3, [r4, #24]
+  77:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC1PE;
+ 521              		.loc 1 77 5 is_stmt 1 view .LVU139
+  77:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC1PE;
+ 522              		.loc 1 77 9 is_stmt 0 view .LVU140
+ 523 0106 A369     		ldr	r3, [r4, #24]
+  77:Core/Src/motor.c ****     TIM3->CCMR1 |= TIM_CCMR1_OC1PE;
+ 524              		.loc 1 77 17 view .LVU141
+ 525 0108 5146     		mov	r1, r10
+ 526 010a 0B43     		orrs	r3, r1
+ 527 010c A361     		str	r3, [r4, #24]
+  78:Core/Src/motor.c ****     TIM3->CCER |= TIM_CCER_CC1E;
+ 528              		.loc 1 78 5 is_stmt 1 view .LVU142
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 15
+
+
+  78:Core/Src/motor.c ****     TIM3->CCER |= TIM_CCER_CC1E;
+ 529              		.loc 1 78 9 is_stmt 0 view .LVU143
+ 530 010e A369     		ldr	r3, [r4, #24]
+  78:Core/Src/motor.c ****     TIM3->CCER |= TIM_CCER_CC1E;
+ 531              		.loc 1 78 17 view .LVU144
+ 532 0110 4946     		mov	r1, r9
+ 533 0112 0B43     		orrs	r3, r1
+ 534 0114 A361     		str	r3, [r4, #24]
+  79:Core/Src/motor.c ****     // TIM3->CCR1 = (freq * TIM3->ARR) / 255;
+ 535              		.loc 1 79 5 is_stmt 1 view .LVU145
+  79:Core/Src/motor.c ****     // TIM3->CCR1 = (freq * TIM3->ARR) / 255;
+ 536              		.loc 1 79 9 is_stmt 0 view .LVU146
+ 537 0116 236A     		ldr	r3, [r4, #32]
+  79:Core/Src/motor.c ****     // TIM3->CCR1 = (freq * TIM3->ARR) / 255;
+ 538              		.loc 1 79 16 view .LVU147
+ 539 0118 4146     		mov	r1, r8
+ 540 011a 0B43     		orrs	r3, r1
+ 541 011c 2362     		str	r3, [r4, #32]
+  81:Core/Src/motor.c ****     
+ 542              		.loc 1 81 5 is_stmt 1 view .LVU148
+ 543 011e 3900     		movs	r1, r7
+ 544 0120 0220     		movs	r0, #2
+ 545 0122 FFF7FEFF 		bl	setPWM
+ 546              	.LVL28:
+  85:Core/Src/motor.c ****     GPIOB->MODER |= GPIO_MODER_MODE5_1; // alternate
+ 547              		.loc 1 85 5 view .LVU149
+  85:Core/Src/motor.c ****     GPIOB->MODER |= GPIO_MODER_MODE5_1; // alternate
+ 548              		.loc 1 85 10 is_stmt 0 view .LVU150
+ 549 0126 2B68     		ldr	r3, [r5]
+  85:Core/Src/motor.c ****     GPIOB->MODER |= GPIO_MODER_MODE5_1; // alternate
+ 550              		.loc 1 85 18 view .LVU151
+ 551 0128 244A     		ldr	r2, .L19+44
+ 552 012a 1340     		ands	r3, r2
+ 553 012c 2B60     		str	r3, [r5]
+  86:Core/Src/motor.c ****     GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL5_Msk;
+ 554              		.loc 1 86 5 is_stmt 1 view .LVU152
+  86:Core/Src/motor.c ****     GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL5_Msk;
+ 555              		.loc 1 86 10 is_stmt 0 view .LVU153
+ 556 012e 2B68     		ldr	r3, [r5]
+  86:Core/Src/motor.c ****     GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL5_Msk;
+ 557              		.loc 1 86 18 view .LVU154
+ 558 0130 8022     		movs	r2, #128
+ 559 0132 1201     		lsls	r2, r2, #4
+ 560 0134 1343     		orrs	r3, r2
+ 561 0136 2B60     		str	r3, [r5]
+  87:Core/Src/motor.c ****     GPIOB->AFR[0] |= GPIO_AFRL_AFSEL5_0 | GPIO_AFRL_AFSEL5_1; // AF3
+ 562              		.loc 1 87 5 is_stmt 1 view .LVU155
+  87:Core/Src/motor.c ****     GPIOB->AFR[0] |= GPIO_AFRL_AFSEL5_0 | GPIO_AFRL_AFSEL5_1; // AF3
+ 563              		.loc 1 87 15 is_stmt 0 view .LVU156
+ 564 0138 2B6A     		ldr	r3, [r5, #32]
+  87:Core/Src/motor.c ****     GPIOB->AFR[0] |= GPIO_AFRL_AFSEL5_0 | GPIO_AFRL_AFSEL5_1; // AF3
+ 565              		.loc 1 87 19 view .LVU157
+ 566 013a 214A     		ldr	r2, .L19+48
+ 567 013c 1340     		ands	r3, r2
+ 568 013e 2B62     		str	r3, [r5, #32]
+  88:Core/Src/motor.c **** 
+ 569              		.loc 1 88 5 is_stmt 1 view .LVU158
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 16
+
+
+  88:Core/Src/motor.c **** 
+ 570              		.loc 1 88 15 is_stmt 0 view .LVU159
+ 571 0140 2A6A     		ldr	r2, [r5, #32]
+  88:Core/Src/motor.c **** 
+ 572              		.loc 1 88 19 view .LVU160
+ 573 0142 C023     		movs	r3, #192
+ 574 0144 9B03     		lsls	r3, r3, #14
+ 575 0146 1343     		orrs	r3, r2
+ 576 0148 2B62     		str	r3, [r5, #32]
+  91:Core/Src/motor.c ****     TIM3->CCMR2 |= TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2; // PWM M1
+ 577              		.loc 1 91 5 is_stmt 1 view .LVU161
+  91:Core/Src/motor.c ****     TIM3->CCMR2 |= TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2; // PWM M1
+ 578              		.loc 1 91 9 is_stmt 0 view .LVU162
+ 579 014a E369     		ldr	r3, [r4, #28]
+  91:Core/Src/motor.c ****     TIM3->CCMR2 |= TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2; // PWM M1
+ 580              		.loc 1 91 17 view .LVU163
+ 581 014c 5A46     		mov	r2, fp
+ 582 014e 1340     		ands	r3, r2
+ 583 0150 E361     		str	r3, [r4, #28]
+  92:Core/Src/motor.c ****     TIM3->CCMR2 |= TIM_CCMR2_OC3PE;
+ 584              		.loc 1 92 5 is_stmt 1 view .LVU164
+  92:Core/Src/motor.c ****     TIM3->CCMR2 |= TIM_CCMR2_OC3PE;
+ 585              		.loc 1 92 9 is_stmt 0 view .LVU165
+ 586 0152 E369     		ldr	r3, [r4, #28]
+  92:Core/Src/motor.c ****     TIM3->CCMR2 |= TIM_CCMR2_OC3PE;
+ 587              		.loc 1 92 17 view .LVU166
+ 588 0154 5246     		mov	r2, r10
+ 589 0156 1343     		orrs	r3, r2
+ 590 0158 E361     		str	r3, [r4, #28]
+  93:Core/Src/motor.c ****     TIM3->CCER |= TIM_CCER_CC3E;
+ 591              		.loc 1 93 5 is_stmt 1 view .LVU167
+  93:Core/Src/motor.c ****     TIM3->CCER |= TIM_CCER_CC3E;
+ 592              		.loc 1 93 9 is_stmt 0 view .LVU168
+ 593 015a E369     		ldr	r3, [r4, #28]
+  93:Core/Src/motor.c ****     TIM3->CCER |= TIM_CCER_CC3E;
+ 594              		.loc 1 93 17 view .LVU169
+ 595 015c 4A46     		mov	r2, r9
+ 596 015e 1343     		orrs	r3, r2
+ 597 0160 E361     		str	r3, [r4, #28]
+  94:Core/Src/motor.c ****     // TIM3->CCR3 = (freq * TIM3->ARR) / 255;
+ 598              		.loc 1 94 5 is_stmt 1 view .LVU170
+  94:Core/Src/motor.c ****     // TIM3->CCR3 = (freq * TIM3->ARR) / 255;
+ 599              		.loc 1 94 9 is_stmt 0 view .LVU171
+ 600 0162 226A     		ldr	r2, [r4, #32]
+  94:Core/Src/motor.c ****     // TIM3->CCR3 = (freq * TIM3->ARR) / 255;
+ 601              		.loc 1 94 16 view .LVU172
+ 602 0164 8023     		movs	r3, #128
+ 603 0166 5B00     		lsls	r3, r3, #1
+ 604 0168 1343     		orrs	r3, r2
+ 605 016a 2362     		str	r3, [r4, #32]
+  96:Core/Src/motor.c **** 
+ 606              		.loc 1 96 5 is_stmt 1 view .LVU173
+ 607 016c 3900     		movs	r1, r7
+ 608 016e 0320     		movs	r0, #3
+ 609 0170 FFF7FEFF 		bl	setPWM
+ 610              	.LVL29:
+  99:Core/Src/motor.c ****     TIM3->CR1 |= TIM_CR1_CEN; 
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 17
+
+
+ 611              		.loc 1 99 5 view .LVU174
+  99:Core/Src/motor.c ****     TIM3->CR1 |= TIM_CR1_CEN; 
+ 612              		.loc 1 99 10 is_stmt 0 view .LVU175
+ 613 0174 3368     		ldr	r3, [r6]
+  99:Core/Src/motor.c ****     TIM3->CR1 |= TIM_CR1_CEN; 
+ 614              		.loc 1 99 16 view .LVU176
+ 615 0176 4246     		mov	r2, r8
+ 616 0178 1343     		orrs	r3, r2
+ 617 017a 3360     		str	r3, [r6]
+ 100:Core/Src/motor.c **** }
+ 618              		.loc 1 100 5 is_stmt 1 view .LVU177
+ 100:Core/Src/motor.c **** }
+ 619              		.loc 1 100 9 is_stmt 0 view .LVU178
+ 620 017c 2368     		ldr	r3, [r4]
+ 100:Core/Src/motor.c **** }
+ 621              		.loc 1 100 15 view .LVU179
+ 622 017e 1343     		orrs	r3, r2
+ 623 0180 2360     		str	r3, [r4]
+ 101:Core/Src/motor.c **** 
+ 624              		.loc 1 101 1 view .LVU180
+ 625              		@ sp needed
+ 626              	.LVL30:
+ 101:Core/Src/motor.c **** 
+ 627              		.loc 1 101 1 view .LVU181
+ 628 0182 F0BC     		pop	{r4, r5, r6, r7}
+ 629 0184 BB46     		mov	fp, r7
+ 630 0186 B246     		mov	r10, r6
+ 631 0188 A946     		mov	r9, r5
+ 632 018a A046     		mov	r8, r4
+ 633 018c F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 634              	.L20:
+ 635 018e C046     		.align	2
+ 636              	.L19:
+ 637 0190 FF3FFFFF 		.word	-49153
+ 638 0194 00100240 		.word	1073876992
+ 639 0198 00200040 		.word	1073750016
+ 640 019c E7030000 		.word	999
+ 641 01a0 8FFFFEFF 		.word	-65649
+ 642 01a4 00040050 		.word	1342178304
+ 643 01a8 FF0FFFFF 		.word	-61441
+ 644 01ac 00040040 		.word	1073742848
+ 645 01b0 FF8FFFFE 		.word	-16805889
+ 646 01b4 FFFCFFFF 		.word	-769
+ 647 01b8 FFFFF0FF 		.word	-983041
+ 648 01bc FFF3FFFF 		.word	-3073
+ 649 01c0 FFFF0FFF 		.word	-15728641
+ 650              		.cfi_endproc
+ 651              	.LFE218:
+ 653              		.section	.rodata.initMotor.str1.4,"aMS",%progbits,1
+ 654              		.align	2
+ 655              	.LC7:
+ 656 0000 496E6974 		.ascii	"Initializing motors\015\012\000"
+ 656      69616C69 
+ 656      7A696E67 
+ 656      206D6F74 
+ 656      6F72730D 
+ 657              		.section	.text.initMotor,"ax",%progbits
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 18
+
+
+ 658              		.align	1
+ 659              		.global	initMotor
+ 660              		.syntax unified
+ 661              		.code	16
+ 662              		.thumb_func
+ 664              	initMotor:
+ 665              	.LFB219:
+ 103:Core/Src/motor.c ****     uart_send_string("Initializing motors\r\n");
+ 666              		.loc 1 103 18 is_stmt 1 view -0
+ 667              		.cfi_startproc
+ 668              		@ args = 0, pretend = 0, frame = 0
+ 669              		@ frame_needed = 0, uses_anonymous_args = 0
+ 670 0000 10B5     		push	{r4, lr}
+ 671              	.LCFI5:
+ 672              		.cfi_def_cfa_offset 8
+ 673              		.cfi_offset 4, -8
+ 674              		.cfi_offset 14, -4
+ 104:Core/Src/motor.c ****     
+ 675              		.loc 1 104 5 view .LVU183
+ 676 0002 3548     		ldr	r0, .L31
+ 677 0004 FFF7FEFF 		bl	uart_send_string
+ 678              	.LVL31:
+ 106:Core/Src/motor.c ****     RCC->IOPENR |= RCC_IOPENR_GPIOBEN; // clock
+ 679              		.loc 1 106 5 view .LVU184
+ 106:Core/Src/motor.c ****     RCC->IOPENR |= RCC_IOPENR_GPIOBEN; // clock
+ 680              		.loc 1 106 8 is_stmt 0 view .LVU185
+ 681 0008 344B     		ldr	r3, .L31+4
+ 682 000a 5A6B     		ldr	r2, [r3, #52]
+ 106:Core/Src/motor.c ****     RCC->IOPENR |= RCC_IOPENR_GPIOBEN; // clock
+ 683              		.loc 1 106 17 view .LVU186
+ 684 000c 0121     		movs	r1, #1
+ 685 000e 0A43     		orrs	r2, r1
+ 686 0010 5A63     		str	r2, [r3, #52]
+ 107:Core/Src/motor.c **** 
+ 687              		.loc 1 107 5 is_stmt 1 view .LVU187
+ 107:Core/Src/motor.c **** 
+ 688              		.loc 1 107 8 is_stmt 0 view .LVU188
+ 689 0012 5A6B     		ldr	r2, [r3, #52]
+ 107:Core/Src/motor.c **** 
+ 690              		.loc 1 107 17 view .LVU189
+ 691 0014 0131     		adds	r1, r1, #1
+ 692 0016 0A43     		orrs	r2, r1
+ 693 0018 5A63     		str	r2, [r3, #52]
+ 109:Core/Src/motor.c ****     MOTORENABLE_PORT->MODER |= GPIO_MODER_MODE15_0;
+ 694              		.loc 1 109 5 is_stmt 1 view .LVU190
+ 109:Core/Src/motor.c ****     MOTORENABLE_PORT->MODER |= GPIO_MODER_MODE15_0;
+ 695              		.loc 1 109 21 is_stmt 0 view .LVU191
+ 696 001a A023     		movs	r3, #160
+ 697 001c DB05     		lsls	r3, r3, #23
+ 698 001e 1A68     		ldr	r2, [r3]
+ 109:Core/Src/motor.c ****     MOTORENABLE_PORT->MODER |= GPIO_MODER_MODE15_0;
+ 699              		.loc 1 109 29 view .LVU192
+ 700 0020 9200     		lsls	r2, r2, #2
+ 701 0022 9208     		lsrs	r2, r2, #2
+ 702 0024 1A60     		str	r2, [r3]
+ 110:Core/Src/motor.c ****     // MOTORENABLE_LOW;  // pull low to enable motors
+ 703              		.loc 1 110 5 is_stmt 1 view .LVU193
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 19
+
+
+ 110:Core/Src/motor.c ****     // MOTORENABLE_LOW;  // pull low to enable motors
+ 704              		.loc 1 110 21 is_stmt 0 view .LVU194
+ 705 0026 1968     		ldr	r1, [r3]
+ 110:Core/Src/motor.c ****     // MOTORENABLE_LOW;  // pull low to enable motors
+ 706              		.loc 1 110 29 view .LVU195
+ 707 0028 8022     		movs	r2, #128
+ 708 002a D205     		lsls	r2, r2, #23
+ 709 002c 0A43     		orrs	r2, r1
+ 710 002e 1A60     		str	r2, [r3]
+ 112:Core/Src/motor.c **** 
+ 711              		.loc 1 112 5 is_stmt 1 view .LVU196
+ 712 0030 5969     		ldr	r1, [r3, #20]
+ 713 0032 8022     		movs	r2, #128
+ 714 0034 1202     		lsls	r2, r2, #8
+ 715 0036 0A43     		orrs	r2, r1
+ 716 0038 5A61     		str	r2, [r3, #20]
+ 114:Core/Src/motor.c ****     MOTORLATCH_PORT->MODER |= GPIO_MODER_MODE6_0;
+ 717              		.loc 1 114 5 view .LVU197
+ 114:Core/Src/motor.c ****     MOTORLATCH_PORT->MODER |= GPIO_MODER_MODE6_0;
+ 718              		.loc 1 114 20 is_stmt 0 view .LVU198
+ 719 003a 1A68     		ldr	r2, [r3]
+ 114:Core/Src/motor.c ****     MOTORLATCH_PORT->MODER |= GPIO_MODER_MODE6_0;
+ 720              		.loc 1 114 28 view .LVU199
+ 721 003c 2849     		ldr	r1, .L31+8
+ 722 003e 0A40     		ands	r2, r1
+ 723 0040 1A60     		str	r2, [r3]
+ 115:Core/Src/motor.c **** 
+ 724              		.loc 1 115 5 is_stmt 1 view .LVU200
+ 115:Core/Src/motor.c **** 
+ 725              		.loc 1 115 20 is_stmt 0 view .LVU201
+ 726 0042 1968     		ldr	r1, [r3]
+ 115:Core/Src/motor.c **** 
+ 727              		.loc 1 115 28 view .LVU202
+ 728 0044 8022     		movs	r2, #128
+ 729 0046 5201     		lsls	r2, r2, #5
+ 730 0048 0A43     		orrs	r2, r1
+ 731 004a 1A60     		str	r2, [r3]
+ 117:Core/Src/motor.c ****     MOTORDATA_PORT->MODER |= GPIO_MODER_MODE9_0;
+ 732              		.loc 1 117 5 is_stmt 1 view .LVU203
+ 117:Core/Src/motor.c ****     MOTORDATA_PORT->MODER |= GPIO_MODER_MODE9_0;
+ 733              		.loc 1 117 19 is_stmt 0 view .LVU204
+ 734 004c 1A68     		ldr	r2, [r3]
+ 117:Core/Src/motor.c ****     MOTORDATA_PORT->MODER |= GPIO_MODER_MODE9_0;
+ 735              		.loc 1 117 27 view .LVU205
+ 736 004e 2549     		ldr	r1, .L31+12
+ 737 0050 0A40     		ands	r2, r1
+ 738 0052 1A60     		str	r2, [r3]
+ 118:Core/Src/motor.c **** 
+ 739              		.loc 1 118 5 is_stmt 1 view .LVU206
+ 118:Core/Src/motor.c **** 
+ 740              		.loc 1 118 19 is_stmt 0 view .LVU207
+ 741 0054 1968     		ldr	r1, [r3]
+ 118:Core/Src/motor.c **** 
+ 742              		.loc 1 118 27 view .LVU208
+ 743 0056 8022     		movs	r2, #128
+ 744 0058 D202     		lsls	r2, r2, #11
+ 745 005a 0A43     		orrs	r2, r1
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 20
+
+
+ 746 005c 1A60     		str	r2, [r3]
+ 120:Core/Src/motor.c ****     MOTORCLK_PORT->MODER |= GPIO_MODER_MODE10_0;
+ 747              		.loc 1 120 5 is_stmt 1 view .LVU209
+ 120:Core/Src/motor.c ****     MOTORCLK_PORT->MODER |= GPIO_MODER_MODE10_0;
+ 748              		.loc 1 120 18 is_stmt 0 view .LVU210
+ 749 005e 224B     		ldr	r3, .L31+16
+ 750 0060 1A68     		ldr	r2, [r3]
+ 120:Core/Src/motor.c ****     MOTORCLK_PORT->MODER |= GPIO_MODER_MODE10_0;
+ 751              		.loc 1 120 26 view .LVU211
+ 752 0062 2249     		ldr	r1, .L31+20
+ 753 0064 0A40     		ands	r2, r1
+ 754 0066 1A60     		str	r2, [r3]
+ 121:Core/Src/motor.c **** 
+ 755              		.loc 1 121 5 is_stmt 1 view .LVU212
+ 121:Core/Src/motor.c **** 
+ 756              		.loc 1 121 18 is_stmt 0 view .LVU213
+ 757 0068 1968     		ldr	r1, [r3]
+ 121:Core/Src/motor.c **** 
+ 758              		.loc 1 121 26 view .LVU214
+ 759 006a 8022     		movs	r2, #128
+ 760 006c 5203     		lsls	r2, r2, #13
+ 761 006e 0A43     		orrs	r2, r1
+ 762 0070 1A60     		str	r2, [r3]
+ 123:Core/Src/motor.c ****     txLatch();
+ 763              		.loc 1 123 5 is_stmt 1 view .LVU215
+ 123:Core/Src/motor.c ****     txLatch();
+ 764              		.loc 1 123 16 is_stmt 0 view .LVU216
+ 765 0072 1F4B     		ldr	r3, .L31+24
+ 766 0074 0022     		movs	r2, #0
+ 767 0076 1A70     		strb	r2, [r3]
+ 124:Core/Src/motor.c **** 
+ 768              		.loc 1 124 5 is_stmt 1 view .LVU217
+ 769 0078 FFF7FEFF 		bl	txLatch
+ 770              	.LVL32:
+ 126:Core/Src/motor.c ****         Motor *m = &motors[pos];
+ 771              		.loc 1 126 5 view .LVU218
+ 772              	.LBB3:
+ 126:Core/Src/motor.c ****         Motor *m = &motors[pos];
+ 773              		.loc 1 126 9 view .LVU219
+ 126:Core/Src/motor.c ****         Motor *m = &motors[pos];
+ 774              		.loc 1 126 13 is_stmt 0 view .LVU220
+ 775 007c 0023     		movs	r3, #0
+ 126:Core/Src/motor.c ****         Motor *m = &motors[pos];
+ 776              		.loc 1 126 5 view .LVU221
+ 777 007e 0DE0     		b	.L22
+ 778              	.LVL33:
+ 779              	.L24:
+ 780              	.LBB4:
+ 129:Core/Src/motor.c ****             case FRONT_LEFT:
+ 781              		.loc 1 129 9 view .LVU222
+ 782 0080 032B     		cmp	r3, #3
+ 783 0082 0AD1     		bne	.L27
+ 140:Core/Src/motor.c ****                 break;
+ 784              		.loc 1 140 17 is_stmt 1 view .LVU223
+ 140:Core/Src/motor.c ****                 break;
+ 785              		.loc 1 140 28 is_stmt 0 view .LVU224
+ 786 0084 1A49     		ldr	r1, .L31+24
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 21
+
+
+ 787 0086 0A78     		ldrb	r2, [r1]
+ 788 0088 4120     		movs	r0, #65
+ 789 008a 8243     		bics	r2, r0
+ 790 008c 0A70     		strb	r2, [r1]
+ 141:Core/Src/motor.c ****         }
+ 791              		.loc 1 141 17 is_stmt 1 view .LVU225
+ 792 008e 04E0     		b	.L27
+ 793              	.L25:
+ 131:Core/Src/motor.c ****                 break;
+ 794              		.loc 1 131 17 view .LVU226
+ 131:Core/Src/motor.c ****                 break;
+ 795              		.loc 1 131 28 is_stmt 0 view .LVU227
+ 796 0090 1749     		ldr	r1, .L31+24
+ 797 0092 0A78     		ldrb	r2, [r1]
+ 798 0094 0C20     		movs	r0, #12
+ 799 0096 8243     		bics	r2, r0
+ 800 0098 0A70     		strb	r2, [r1]
+ 132:Core/Src/motor.c ****             case FRONT_RIGHT:
+ 801              		.loc 1 132 17 is_stmt 1 view .LVU228
+ 802              	.L27:
+ 803              	.LBE4:
+ 126:Core/Src/motor.c ****         Motor *m = &motors[pos];
+ 804              		.loc 1 126 34 discriminator 2 view .LVU229
+ 805 009a 0133     		adds	r3, r3, #1
+ 806              	.LVL34:
+ 807              	.L22:
+ 126:Core/Src/motor.c ****         Motor *m = &motors[pos];
+ 808              		.loc 1 126 26 discriminator 1 view .LVU230
+ 809 009c 032B     		cmp	r3, #3
+ 810 009e 14DC     		bgt	.L30
+ 811              	.LBB5:
+ 127:Core/Src/motor.c ****         m->motornum = pos;
+ 812              		.loc 1 127 9 view .LVU231
+ 813              	.LVL35:
+ 128:Core/Src/motor.c ****         switch(pos) {
+ 814              		.loc 1 128 9 view .LVU232
+ 128:Core/Src/motor.c ****         switch(pos) {
+ 815              		.loc 1 128 21 is_stmt 0 view .LVU233
+ 816 00a0 144A     		ldr	r2, .L31+28
+ 817 00a2 D354     		strb	r3, [r2, r3]
+ 129:Core/Src/motor.c ****             case FRONT_LEFT:
+ 818              		.loc 1 129 9 is_stmt 1 view .LVU234
+ 819 00a4 022B     		cmp	r3, #2
+ 820 00a6 0AD0     		beq	.L23
+ 821 00a8 EADC     		bgt	.L24
+ 822 00aa 002B     		cmp	r3, #0
+ 823 00ac F0D0     		beq	.L25
+ 824 00ae 012B     		cmp	r3, #1
+ 825 00b0 F3D1     		bne	.L27
+ 134:Core/Src/motor.c ****                 break;
+ 826              		.loc 1 134 17 view .LVU235
+ 134:Core/Src/motor.c ****                 break;
+ 827              		.loc 1 134 28 is_stmt 0 view .LVU236
+ 828 00b2 0F49     		ldr	r1, .L31+24
+ 829 00b4 0A78     		ldrb	r2, [r1]
+ 830 00b6 1220     		movs	r0, #18
+ 831 00b8 8243     		bics	r2, r0
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 22
+
+
+ 832 00ba 0A70     		strb	r2, [r1]
+ 135:Core/Src/motor.c ****             case BACK_LEFT:
+ 833              		.loc 1 135 17 is_stmt 1 view .LVU237
+ 834 00bc EDE7     		b	.L27
+ 835              	.L23:
+ 137:Core/Src/motor.c ****                 break;
+ 836              		.loc 1 137 17 view .LVU238
+ 137:Core/Src/motor.c ****                 break;
+ 837              		.loc 1 137 28 is_stmt 0 view .LVU239
+ 838 00be 0C49     		ldr	r1, .L31+24
+ 839 00c0 0878     		ldrb	r0, [r1]
+ 840 00c2 5F22     		movs	r2, #95
+ 841 00c4 0240     		ands	r2, r0
+ 842 00c6 0A70     		strb	r2, [r1]
+ 138:Core/Src/motor.c ****             case BACK_RIGHT: 
+ 843              		.loc 1 138 17 is_stmt 1 view .LVU240
+ 844 00c8 E7E7     		b	.L27
+ 845              	.LVL36:
+ 846              	.L30:
+ 138:Core/Src/motor.c ****             case BACK_RIGHT: 
+ 847              		.loc 1 138 17 is_stmt 0 view .LVU241
+ 848              	.LBE5:
+ 849              	.LBE3:
+ 144:Core/Src/motor.c ****     initPWM(DEFAULT_FREQ);
+ 850              		.loc 1 144 5 is_stmt 1 view .LVU242
+ 851 00ca FFF7FEFF 		bl	txLatch
+ 852              	.LVL37:
+ 145:Core/Src/motor.c **** }
+ 853              		.loc 1 145 5 view .LVU243
+ 854 00ce 7D20     		movs	r0, #125
+ 855 00d0 FFF7FEFF 		bl	initPWM
+ 856              	.LVL38:
+ 146:Core/Src/motor.c **** 
+ 857              		.loc 1 146 1 is_stmt 0 view .LVU244
+ 858              		@ sp needed
+ 859 00d4 10BD     		pop	{r4, pc}
+ 860              	.L32:
+ 861 00d6 C046     		.align	2
+ 862              	.L31:
+ 863 00d8 00000000 		.word	.LC7
+ 864 00dc 00100240 		.word	1073876992
+ 865 00e0 FFCFFFFF 		.word	-12289
+ 866 00e4 FFFFF3FF 		.word	-786433
+ 867 00e8 00040050 		.word	1342178304
+ 868 00ec FFFFCFFF 		.word	-3145729
+ 869 00f0 00000000 		.word	latchState
+ 870 00f4 00000000 		.word	motors
+ 871              		.cfi_endproc
+ 872              	.LFE219:
+ 874              		.section	.rodata.run.str1.4,"aMS",%progbits,1
+ 875              		.align	2
+ 876              	.LC11:
+ 877 0000 52756E6E 		.ascii	"Running FRONT_LEFT\015\012\000"
+ 877      696E6720 
+ 877      46524F4E 
+ 877      545F4C45 
+ 877      46540D0A 
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 23
+
+
+ 878 0015 000000   		.align	2
+ 879              	.LC13:
+ 880 0018 52756E6E 		.ascii	"Running FRONT_RIGHT\015\012\000"
+ 880      696E6720 
+ 880      46524F4E 
+ 880      545F5249 
+ 880      4748540D 
+ 881 002e 0000     		.align	2
+ 882              	.LC15:
+ 883 0030 52756E6E 		.ascii	"Running FORWARD\015\012\000"
+ 883      696E6720 
+ 883      464F5257 
+ 883      4152440D 
+ 883      0A00
+ 884 0042 0000     		.align	2
+ 885              	.LC18:
+ 886 0044 52756E6E 		.ascii	"Running BACKWARD\015\012\000"
+ 886      696E6720 
+ 886      4241434B 
+ 886      57415244 
+ 886      0D0A00
+ 887 0057 00       		.align	2
+ 888              	.LC20:
+ 889 0058 52756E6E 		.ascii	"Running RELEASE\015\012\000"
+ 889      696E6720 
+ 889      52454C45 
+ 889      4153450D 
+ 889      0A00
+ 890              		.section	.text.run,"ax",%progbits
+ 891              		.align	1
+ 892              		.global	run
+ 893              		.syntax unified
+ 894              		.code	16
+ 895              		.thumb_func
+ 897              	run:
+ 898              	.LVL39:
+ 899              	.LFB221:
+ 161:Core/Src/motor.c **** 
+ 162:Core/Src/motor.c **** 
+ 163:Core/Src/motor.c **** void run(enum motor_pos pos, uint8_t cmd) {
+ 900              		.loc 1 163 43 is_stmt 1 view -0
+ 901              		.cfi_startproc
+ 902              		@ args = 0, pretend = 0, frame = 0
+ 903              		@ frame_needed = 0, uses_anonymous_args = 0
+ 904              		.loc 1 163 43 is_stmt 0 view .LVU246
+ 905 0000 70B5     		push	{r4, r5, r6, lr}
+ 906              	.LCFI6:
+ 907              		.cfi_def_cfa_offset 16
+ 908              		.cfi_offset 4, -16
+ 909              		.cfi_offset 5, -12
+ 910              		.cfi_offset 6, -8
+ 911              		.cfi_offset 14, -4
+ 912 0002 0400     		movs	r4, r0
+ 913 0004 0D00     		movs	r5, r1
+ 164:Core/Src/motor.c ****     uint8_t a, b;
+ 914              		.loc 1 164 5 is_stmt 1 view .LVU247
+ 165:Core/Src/motor.c ****     switch(pos) {
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 24
+
+
+ 915              		.loc 1 165 5 view .LVU248
+ 916 0006 0228     		cmp	r0, #2
+ 917 0008 2CD0     		beq	.L41
+ 918 000a 08D8     		bhi	.L35
+ 919 000c 0028     		cmp	r0, #0
+ 920 000e 0BD0     		beq	.L36
+ 921 0010 0128     		cmp	r0, #1
+ 922 0012 26D1     		bne	.L33
+ 166:Core/Src/motor.c ****         case FRONT_LEFT:
+ 167:Core/Src/motor.c ****             uart_send_string("Running FRONT_LEFT\r\n");
+ 168:Core/Src/motor.c ****             a = MOTOR1_A; b = MOTOR1_B; break;
+ 169:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 170:Core/Src/motor.c ****             uart_send_string("Running FRONT_RIGHT\r\n");
+ 923              		.loc 1 170 13 view .LVU249
+ 924 0014 2848     		ldr	r0, .L43
+ 925              	.LVL40:
+ 926              		.loc 1 170 13 is_stmt 0 view .LVU250
+ 927 0016 FFF7FEFF 		bl	uart_send_string
+ 928              	.LVL41:
+ 171:Core/Src/motor.c ****             a = MOTOR2_A; b = MOTOR2_B; break;
+ 929              		.loc 1 171 13 is_stmt 1 view .LVU251
+ 930              		.loc 1 171 27 view .LVU252
+ 931              		.loc 1 171 41 view .LVU253
+ 932              		.loc 1 171 29 is_stmt 0 view .LVU254
+ 933 001a 0426     		movs	r6, #4
+ 934              		.loc 1 171 41 view .LVU255
+ 935 001c 09E0     		b	.L34
+ 936              	.LVL42:
+ 937              	.L35:
+ 165:Core/Src/motor.c ****     switch(pos) {
+ 938              		.loc 1 165 5 view .LVU256
+ 939 001e 0328     		cmp	r0, #3
+ 940 0020 1FD1     		bne	.L33
+ 172:Core/Src/motor.c ****         case BACK_LEFT:
+ 173:Core/Src/motor.c ****             a = MOTOR3_A; b = MOTOR3_B; break;
+ 174:Core/Src/motor.c ****         case BACK_RIGHT:
+ 175:Core/Src/motor.c ****             a = MOTOR4_A; b = MOTOR4_B; break;
+ 941              		.loc 1 175 29 view .LVU257
+ 942 0022 0626     		movs	r6, #6
+ 943              		.loc 1 175 15 view .LVU258
+ 944 0024 0024     		movs	r4, #0
+ 945 0026 04E0     		b	.L34
+ 946              	.L36:
+ 167:Core/Src/motor.c ****             a = MOTOR1_A; b = MOTOR1_B; break;
+ 947              		.loc 1 167 13 is_stmt 1 view .LVU259
+ 948 0028 2448     		ldr	r0, .L43+4
+ 949              	.LVL43:
+ 167:Core/Src/motor.c ****             a = MOTOR1_A; b = MOTOR1_B; break;
+ 950              		.loc 1 167 13 is_stmt 0 view .LVU260
+ 951 002a FFF7FEFF 		bl	uart_send_string
+ 952              	.LVL44:
+ 168:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 953              		.loc 1 168 13 is_stmt 1 view .LVU261
+ 168:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 954              		.loc 1 168 27 view .LVU262
+ 168:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 955              		.loc 1 168 41 view .LVU263
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 25
+
+
+ 168:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 956              		.loc 1 168 29 is_stmt 0 view .LVU264
+ 957 002e 0326     		movs	r6, #3
+ 168:Core/Src/motor.c ****         case FRONT_RIGHT:
+ 958              		.loc 1 168 15 view .LVU265
+ 959 0030 0224     		movs	r4, #2
+ 960              	.LVL45:
+ 961              	.L34:
+ 176:Core/Src/motor.c ****         default:
+ 177:Core/Src/motor.c ****             return;
+ 178:Core/Src/motor.c ****     }
+ 179:Core/Src/motor.c **** 
+ 180:Core/Src/motor.c ****     switch(cmd) {
+ 962              		.loc 1 180 5 is_stmt 1 view .LVU266
+ 963 0032 022D     		cmp	r5, #2
+ 964 0034 19D0     		beq	.L39
+ 965 0036 042D     		cmp	r5, #4
+ 966 0038 29D0     		beq	.L40
+ 967 003a 012D     		cmp	r5, #1
+ 968 003c 11D1     		bne	.L33
+ 181:Core/Src/motor.c ****         case FORWARD:
+ 182:Core/Src/motor.c ****             uart_send_string("Running FORWARD\r\n");
+ 969              		.loc 1 182 13 view .LVU267
+ 970 003e 2048     		ldr	r0, .L43+8
+ 971 0040 FFF7FEFF 		bl	uart_send_string
+ 972              	.LVL46:
+ 183:Core/Src/motor.c ****             latchState |= (1 << a);
+ 973              		.loc 1 183 13 view .LVU268
+ 974              		.loc 1 183 30 is_stmt 0 view .LVU269
+ 975 0044 0123     		movs	r3, #1
+ 976 0046 1800     		movs	r0, r3
+ 977 0048 A040     		lsls	r0, r0, r4
+ 978              		.loc 1 183 24 view .LVU270
+ 979 004a 1E49     		ldr	r1, .L43+12
+ 980 004c 0A78     		ldrb	r2, [r1]
+ 981 004e 0243     		orrs	r2, r0
+ 982 0050 D2B2     		uxtb	r2, r2
+ 983 0052 0A70     		strb	r2, [r1]
+ 184:Core/Src/motor.c ****             latchState &= ~(1 << b);
+ 984              		.loc 1 184 13 is_stmt 1 view .LVU271
+ 985              		.loc 1 184 31 is_stmt 0 view .LVU272
+ 986 0054 B340     		lsls	r3, r3, r6
+ 987              		.loc 1 184 24 view .LVU273
+ 988 0056 DB43     		mvns	r3, r3
+ 989 0058 5BB2     		sxtb	r3, r3
+ 990 005a 1340     		ands	r3, r2
+ 991 005c 0B70     		strb	r3, [r1]
+ 185:Core/Src/motor.c ****             txLatch();
+ 992              		.loc 1 185 13 is_stmt 1 view .LVU274
+ 993 005e FFF7FEFF 		bl	txLatch
+ 994              	.LVL47:
+ 186:Core/Src/motor.c ****             break;
+ 995              		.loc 1 186 13 view .LVU275
+ 996              	.L33:
+ 187:Core/Src/motor.c ****         case BACKWARD:
+ 188:Core/Src/motor.c ****             uart_send_string("Running BACKWARD\r\n");
+ 189:Core/Src/motor.c ****             latchState &= ~(1 << a);
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 26
+
+
+ 190:Core/Src/motor.c ****             latchState |= (1 << b);
+ 191:Core/Src/motor.c ****             txLatch();
+ 192:Core/Src/motor.c ****             break;
+ 193:Core/Src/motor.c ****         case RELEASE:
+ 194:Core/Src/motor.c ****             uart_send_string("Running RELEASE\r\n");
+ 195:Core/Src/motor.c ****             latchState &= ~(1 << a);
+ 196:Core/Src/motor.c ****             latchState &= ~(1 << b);
+ 197:Core/Src/motor.c ****             txLatch();
+ 198:Core/Src/motor.c ****             break;
+ 199:Core/Src/motor.c ****     }
+ 200:Core/Src/motor.c ****     // txLatch();
+ 201:Core/Src/motor.c **** }
+ 997              		.loc 1 201 1 is_stmt 0 view .LVU276
+ 998              		@ sp needed
+ 999              	.LVL48:
+ 1000              		.loc 1 201 1 view .LVU277
+ 1001 0062 70BD     		pop	{r4, r5, r6, pc}
+ 1002              	.LVL49:
+ 1003              	.L41:
+ 165:Core/Src/motor.c ****         case FRONT_LEFT:
+ 1004              		.loc 1 165 5 view .LVU278
+ 1005 0064 0726     		movs	r6, #7
+ 1006 0066 0524     		movs	r4, #5
+ 1007 0068 E3E7     		b	.L34
+ 1008              	.LVL50:
+ 1009              	.L39:
+ 188:Core/Src/motor.c ****             latchState &= ~(1 << a);
+ 1010              		.loc 1 188 13 is_stmt 1 view .LVU279
+ 1011 006a 1748     		ldr	r0, .L43+16
+ 1012 006c FFF7FEFF 		bl	uart_send_string
+ 1013              	.LVL51:
+ 189:Core/Src/motor.c ****             latchState |= (1 << b);
+ 1014              		.loc 1 189 13 view .LVU280
+ 189:Core/Src/motor.c ****             latchState |= (1 << b);
+ 1015              		.loc 1 189 31 is_stmt 0 view .LVU281
+ 1016 0070 0122     		movs	r2, #1
+ 1017 0072 1300     		movs	r3, r2
+ 1018 0074 A340     		lsls	r3, r3, r4
+ 189:Core/Src/motor.c ****             latchState |= (1 << b);
+ 1019              		.loc 1 189 24 view .LVU282
+ 1020 0076 DB43     		mvns	r3, r3
+ 1021 0078 5BB2     		sxtb	r3, r3
+ 1022 007a 1249     		ldr	r1, .L43+12
+ 1023 007c 0878     		ldrb	r0, [r1]
+ 1024 007e 0340     		ands	r3, r0
+ 1025 0080 0B70     		strb	r3, [r1]
+ 190:Core/Src/motor.c ****             txLatch();
+ 1026              		.loc 1 190 13 is_stmt 1 view .LVU283
+ 190:Core/Src/motor.c ****             txLatch();
+ 1027              		.loc 1 190 30 is_stmt 0 view .LVU284
+ 1028 0082 B240     		lsls	r2, r2, r6
+ 190:Core/Src/motor.c ****             txLatch();
+ 1029              		.loc 1 190 24 view .LVU285
+ 1030 0084 1343     		orrs	r3, r2
+ 1031 0086 0B70     		strb	r3, [r1]
+ 191:Core/Src/motor.c ****             break;
+ 1032              		.loc 1 191 13 is_stmt 1 view .LVU286
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 27
+
+
+ 1033 0088 FFF7FEFF 		bl	txLatch
+ 1034              	.LVL52:
+ 192:Core/Src/motor.c ****         case RELEASE:
+ 1035              		.loc 1 192 13 view .LVU287
+ 1036 008c E9E7     		b	.L33
+ 1037              	.L40:
+ 194:Core/Src/motor.c ****             latchState &= ~(1 << a);
+ 1038              		.loc 1 194 13 view .LVU288
+ 1039 008e 0F48     		ldr	r0, .L43+20
+ 1040 0090 FFF7FEFF 		bl	uart_send_string
+ 1041              	.LVL53:
+ 195:Core/Src/motor.c ****             latchState &= ~(1 << b);
+ 1042              		.loc 1 195 13 view .LVU289
+ 195:Core/Src/motor.c ****             latchState &= ~(1 << b);
+ 1043              		.loc 1 195 31 is_stmt 0 view .LVU290
+ 1044 0094 0123     		movs	r3, #1
+ 1045 0096 1A00     		movs	r2, r3
+ 1046 0098 A240     		lsls	r2, r2, r4
+ 195:Core/Src/motor.c ****             latchState &= ~(1 << b);
+ 1047              		.loc 1 195 24 view .LVU291
+ 1048 009a D243     		mvns	r2, r2
+ 1049 009c 52B2     		sxtb	r2, r2
+ 1050 009e 0949     		ldr	r1, .L43+12
+ 1051 00a0 0878     		ldrb	r0, [r1]
+ 1052 00a2 0240     		ands	r2, r0
+ 1053 00a4 0A70     		strb	r2, [r1]
+ 196:Core/Src/motor.c ****             txLatch();
+ 1054              		.loc 1 196 13 is_stmt 1 view .LVU292
+ 196:Core/Src/motor.c ****             txLatch();
+ 1055              		.loc 1 196 31 is_stmt 0 view .LVU293
+ 1056 00a6 B340     		lsls	r3, r3, r6
+ 196:Core/Src/motor.c ****             txLatch();
+ 1057              		.loc 1 196 24 view .LVU294
+ 1058 00a8 DB43     		mvns	r3, r3
+ 1059 00aa 5BB2     		sxtb	r3, r3
+ 1060 00ac 1340     		ands	r3, r2
+ 1061 00ae 0B70     		strb	r3, [r1]
+ 197:Core/Src/motor.c ****             break;
+ 1062              		.loc 1 197 13 is_stmt 1 view .LVU295
+ 1063 00b0 FFF7FEFF 		bl	txLatch
+ 1064              	.LVL54:
+ 198:Core/Src/motor.c ****     }
+ 1065              		.loc 1 198 13 view .LVU296
+ 1066 00b4 D5E7     		b	.L33
+ 1067              	.L44:
+ 1068 00b6 C046     		.align	2
+ 1069              	.L43:
+ 1070 00b8 18000000 		.word	.LC13
+ 1071 00bc 00000000 		.word	.LC11
+ 1072 00c0 30000000 		.word	.LC15
+ 1073 00c4 00000000 		.word	latchState
+ 1074 00c8 44000000 		.word	.LC18
+ 1075 00cc 58000000 		.word	.LC20
+ 1076              		.cfi_endproc
+ 1077              	.LFE221:
+ 1079              		.section	.bss.latchState,"aw",%nobits
+ 1082              	latchState:
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 28
+
+
+ 1083 0000 00       		.space	1
+ 1084              		.section	.bss.motors,"aw",%nobits
+ 1085              		.align	2
+ 1088              	motors:
+ 1089 0000 00000000 		.space	4
+ 1090              		.text
+ 1091              	.Letext0:
+ 1092              		.file 2 "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/arm-none-eabi/include/ma
+ 1093              		.file 3 "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/arm-none-eabi/include/sy
+ 1094              		.file 4 "Drivers/CMSIS/Device/ST/STM32C0xx/Include/stm32c031xx.h"
+ 1095              		.file 5 "Core/Inc/motor.h"
+ 1096              		.file 6 "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/arm-none-eabi/include/st
+ 1097              		.file 7 "Core/Inc/uart.h"
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s 			page 29
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 motor.c
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:19     .rodata.txLatch.str1.4:00000000 $d
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:29     .text.txLatch:00000000 $t
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:34     .text.txLatch:00000000 txLatch
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:154    .text.txLatch:00000090 $d
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:1082   .bss.latchState:00000000 latchState
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:165    .text.setPWM:00000000 $t
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:171    .text.setPWM:00000000 setPWM
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:276    .text.setPWM:00000054 $d
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:282    .text.initPWM:00000000 $t
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:288    .text.initPWM:00000000 initPWM
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:637    .text.initPWM:00000190 $d
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:654    .rodata.initMotor.str1.4:00000000 $d
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:658    .text.initMotor:00000000 $t
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:664    .text.initMotor:00000000 initMotor
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:863    .text.initMotor:000000d8 $d
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:1088   .bss.motors:00000000 motors
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:875    .rodata.run.str1.4:00000000 $d
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:891    .text.run:00000000 $t
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:897    .text.run:00000000 run
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:1070   .text.run:000000b8 $d
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:1083   .bss.latchState:00000000 $d
+C:\Users\amosd\AppData\Local\Temp\ccxFFzee.s:1085   .bss.motors:00000000 $d
+
+UNDEFINED SYMBOLS
+uart_send_string
+sprintf
+__aeabi_uidiv

@@ -1,45 +1,29 @@
 #include "motor.h"
+#include "uart.h"
 
 static Motor motors[4];
 static uint8_t latchState;
-static const uint8_t DEFAULT_FREQ = 125;
+static const uint8_t DEFAULT_FREQ = 125; // about 50% duty cycle with 64 prescaler
 
-void initMotor() {
-    RCC->IOPENR = RCC_IOPENR_GPIOAEN; // latch and data
-    RCC->IOPENR = RCC_IOPENR_GPIOBEN; // clock
-
-    MOTORLATCH_PORT->MODER &= ~GPIO_MODER_MODE6_Msk;
-    MOTORLATCH_PORT->MODER |= GPIO_MODER_MODE6_0;
-
-    MOTORDATA_PORT->MODER &= ~GPIO_MODER_MODE9_Msk;
-    MOTORDATA_PORT->MODER |= GPIO_MODER_MODE9_0;
-
-    MOTORCLK_PORT->MODER &= ~GPIO_MODER_MODE10_Msk;
-    MOTORCLK_PORT->MODER |= GPIO_MODER_MODE10_0;
-
-    latchState = 0;
-    txLatch();
-
-    for(int pos = 0; pos < 4; pos++) {
-        Motor *m = &motors[pos];
-        m->motornum = pos;
-        switch(pos) {
-            case FRONT_LEFT:
-                latchState &= ~(1 << MOTOR1_A) & ~(1 << MOTOR1_B);
-                break;
-            case FRONT_RIGHT:
-                latchState &= ~(1 << MOTOR2_A) & ~(1 << MOTOR2_B);
-                break;
-            case BACK_LEFT:
-                latchState &= ~(1 << MOTOR3_A) & ~(1 << MOTOR3_B);
-                break;
-            case BACK_RIGHT: 
-                latchState &= ~(1 << MOTOR4_A) & ~(1 << MOTOR4_B);
-                break;
-        }
+static void txLatch() {
+    uart_send_string("Transmitting latch state\r\n");
+    uart_send_string("Latch state: ");
+    char buf[10];
+    sprintf(buf, "%d\r\n", latchState);
+    uart_send_string(buf);
+    MOTORLATCH_LOW;
+    MOTORDATA_LOW;
+    for(int i = 7; i >= 0; i--) {
+        MOTORCLK_LOW;
+        if(latchState & (1 << i))
+            // uart_send_string("Setting bit high\r\n");
+            MOTORDATA_HIGH;
+        else
+            // uart_send_string("Setting bit low\r\n");
+            MOTORDATA_LOW;
+        MOTORCLK_HIGH;
     }
-    txLatch();
-    initPWM(DEFAULT_FREQ);
+    MOTORLATCH_HIGH;
 }
 
 void initPWM(uint8_t freq) {
@@ -116,6 +100,52 @@ void initPWM(uint8_t freq) {
     TIM3->CR1 |= TIM_CR1_CEN; 
 }
 
+void initMotor() {
+    uart_send_string("Initializing motors\r\n");
+    
+    RCC->IOPENR |= RCC_IOPENR_GPIOAEN; // latch and data
+    RCC->IOPENR |= RCC_IOPENR_GPIOBEN; // clock
+
+    MOTORENABLE_PORT->MODER &= ~GPIO_MODER_MODE15_Msk;
+    MOTORENABLE_PORT->MODER |= GPIO_MODER_MODE15_0;
+    MOTORENABLE_LOW;  // pull low to enable motors
+    // MOTORENABLE_HIGH;  // pull low to enable motors
+
+    MOTORLATCH_PORT->MODER &= ~GPIO_MODER_MODE6_Msk;
+    MOTORLATCH_PORT->MODER |= GPIO_MODER_MODE6_0;
+
+    MOTORDATA_PORT->MODER &= ~GPIO_MODER_MODE9_Msk;
+    MOTORDATA_PORT->MODER |= GPIO_MODER_MODE9_0;
+
+    MOTORCLK_PORT->MODER &= ~GPIO_MODER_MODE10_Msk;
+    MOTORCLK_PORT->MODER |= GPIO_MODER_MODE10_0;
+
+    latchState = 0;
+    txLatch();
+
+    for(int pos = 0; pos < 4; pos++) {
+        Motor *m = &motors[pos];
+        m->motornum = pos;
+        switch(pos) {
+            case FRONT_LEFT:
+                latchState &= ~(1 << MOTOR1_A) & ~(1 << MOTOR1_B);
+                break;
+            case FRONT_RIGHT:
+                latchState &= ~(1 << MOTOR2_A) & ~(1 << MOTOR2_B);
+                break;
+            case BACK_LEFT:
+                latchState &= ~(1 << MOTOR3_A) & ~(1 << MOTOR3_B);
+                break;
+            case BACK_RIGHT: 
+                latchState &= ~(1 << MOTOR4_A) & ~(1 << MOTOR4_B);
+                break;
+        }
+    }
+    txLatch();
+    initPWM(DEFAULT_FREQ);
+}
+
+
 void setPWM(enum motor_pos pos, uint8_t freq) {
     switch(pos) {
         case FRONT_LEFT:
@@ -129,26 +159,15 @@ void setPWM(enum motor_pos pos, uint8_t freq) {
     }
 }
 
-static void txLatch(void) {
-    MOTORLATCH_LOW;
-    MOTORDATA_LOW;
-    for(int i = 7; i >= 0; i--) {
-        MOTORCLK_LOW;
-        if(latchState & (1 << i))
-            MOTORDATA_HIGH;
-        else
-            MOTORDATA_LOW;
-        MOTORCLK_HIGH;
-    }
-    MOTORLATCH_HIGH;
-}
 
 void run(enum motor_pos pos, uint8_t cmd) {
     uint8_t a, b;
     switch(pos) {
         case FRONT_LEFT:
+            uart_send_string("Running FRONT_LEFT\r\n");
             a = MOTOR1_A; b = MOTOR1_B; break;
         case FRONT_RIGHT:
+            uart_send_string("Running FRONT_RIGHT\r\n");
             a = MOTOR2_A; b = MOTOR2_B; break;
         case BACK_LEFT:
             a = MOTOR3_A; b = MOTOR3_B; break;
@@ -160,16 +179,19 @@ void run(enum motor_pos pos, uint8_t cmd) {
 
     switch(cmd) {
         case FORWARD:
+            uart_send_string("Running FORWARD\r\n");
             latchState |= (1 << a);
             latchState &= ~(1 << b);
             txLatch();
             break;
         case BACKWARD:
+            uart_send_string("Running BACKWARD\r\n");
             latchState &= ~(1 << a);
             latchState |= (1 << b);
             txLatch();
             break;
         case RELEASE:
+            uart_send_string("Running RELEASE\r\n");
             latchState &= ~(1 << a);
             latchState &= ~(1 << b);
             txLatch();

@@ -1,0 +1,358 @@
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s 			page 1
+
+
+   1              		.cpu cortex-m0plus
+   2              		.arch armv6s-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.file	"uart.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Core/Src/uart.c"
+  18              		.section	.text.uart_init,"ax",%progbits
+  19              		.align	1
+  20              		.global	uart_init
+  21              		.syntax unified
+  22              		.code	16
+  23              		.thumb_func
+  25              	uart_init:
+  26              	.LFB217:
+   1:Core/Src/uart.c **** #include "uart.h"
+   2:Core/Src/uart.c **** 
+   3:Core/Src/uart.c **** void uart_init(void)
+   4:Core/Src/uart.c **** {
+  27              		.loc 1 4 1 view -0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31 0000 10B5     		push	{r4, lr}
+  32              	.LCFI0:
+  33              		.cfi_def_cfa_offset 8
+  34              		.cfi_offset 4, -8
+  35              		.cfi_offset 14, -4
+   5:Core/Src/uart.c ****     RCC->IOPENR |= RCC_IOPENR_GPIOAEN;
+  36              		.loc 1 5 5 view .LVU1
+  37              		.loc 1 5 8 is_stmt 0 view .LVU2
+  38 0002 1D4A     		ldr	r2, .L2
+  39 0004 536B     		ldr	r3, [r2, #52]
+  40              		.loc 1 5 17 view .LVU3
+  41 0006 0120     		movs	r0, #1
+  42 0008 0343     		orrs	r3, r0
+  43 000a 5363     		str	r3, [r2, #52]
+   6:Core/Src/uart.c ****     // PA2 TX, PA3 RX - AF1
+   7:Core/Src/uart.c ****     GPIOA->MODER &= ~GPIO_MODER_MODE2_Msk;
+  44              		.loc 1 7 5 is_stmt 1 view .LVU4
+  45              		.loc 1 7 10 is_stmt 0 view .LVU5
+  46 000c A023     		movs	r3, #160
+  47 000e DB05     		lsls	r3, r3, #23
+  48 0010 1968     		ldr	r1, [r3]
+  49              		.loc 1 7 18 view .LVU6
+  50 0012 3024     		movs	r4, #48
+  51 0014 A143     		bics	r1, r4
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s 			page 2
+
+
+  52 0016 1960     		str	r1, [r3]
+   8:Core/Src/uart.c ****     GPIOA->MODER |= GPIO_MODER_MODE2_1;
+  53              		.loc 1 8 5 is_stmt 1 view .LVU7
+  54              		.loc 1 8 10 is_stmt 0 view .LVU8
+  55 0018 1968     		ldr	r1, [r3]
+  56              		.loc 1 8 18 view .LVU9
+  57 001a 103C     		subs	r4, r4, #16
+  58 001c 2143     		orrs	r1, r4
+  59 001e 1960     		str	r1, [r3]
+   9:Core/Src/uart.c ****     GPIOA->AFR[0] &= ~GPIO_AFRL_AFSEL2_Msk;
+  60              		.loc 1 9 5 is_stmt 1 view .LVU10
+  61              		.loc 1 9 15 is_stmt 0 view .LVU11
+  62 0020 196A     		ldr	r1, [r3, #32]
+  63              		.loc 1 9 19 view .LVU12
+  64 0022 164C     		ldr	r4, .L2+4
+  65 0024 2140     		ands	r1, r4
+  66 0026 1962     		str	r1, [r3, #32]
+  10:Core/Src/uart.c ****     GPIOA->AFR[0] |= GPIO_AFRL_AFSEL2_0;
+  67              		.loc 1 10 5 is_stmt 1 view .LVU13
+  68              		.loc 1 10 15 is_stmt 0 view .LVU14
+  69 0028 1C6A     		ldr	r4, [r3, #32]
+  70              		.loc 1 10 19 view .LVU15
+  71 002a 8021     		movs	r1, #128
+  72 002c 4900     		lsls	r1, r1, #1
+  73 002e 2143     		orrs	r1, r4
+  74 0030 1962     		str	r1, [r3, #32]
+  11:Core/Src/uart.c ****     GPIOA->MODER &= ~GPIO_MODER_MODE3_Msk;
+  75              		.loc 1 11 5 is_stmt 1 view .LVU16
+  76              		.loc 1 11 10 is_stmt 0 view .LVU17
+  77 0032 1968     		ldr	r1, [r3]
+  78              		.loc 1 11 18 view .LVU18
+  79 0034 C024     		movs	r4, #192
+  80 0036 A143     		bics	r1, r4
+  81 0038 1960     		str	r1, [r3]
+  12:Core/Src/uart.c ****     GPIOA->MODER |= GPIO_MODER_MODE3_1;
+  82              		.loc 1 12 5 is_stmt 1 view .LVU19
+  83              		.loc 1 12 10 is_stmt 0 view .LVU20
+  84 003a 1968     		ldr	r1, [r3]
+  85              		.loc 1 12 18 view .LVU21
+  86 003c 403C     		subs	r4, r4, #64
+  87 003e 2143     		orrs	r1, r4
+  88 0040 1960     		str	r1, [r3]
+  13:Core/Src/uart.c ****     GPIOA->AFR[0] &= ~GPIO_AFRL_AFSEL3_Msk;
+  89              		.loc 1 13 5 is_stmt 1 view .LVU22
+  90              		.loc 1 13 15 is_stmt 0 view .LVU23
+  91 0042 196A     		ldr	r1, [r3, #32]
+  92              		.loc 1 13 19 view .LVU24
+  93 0044 0E4C     		ldr	r4, .L2+8
+  94 0046 2140     		ands	r1, r4
+  95 0048 1962     		str	r1, [r3, #32]
+  14:Core/Src/uart.c ****     GPIOA->AFR[0] |= GPIO_AFRL_AFSEL3_0;
+  96              		.loc 1 14 5 is_stmt 1 view .LVU25
+  97              		.loc 1 14 15 is_stmt 0 view .LVU26
+  98 004a 1C6A     		ldr	r4, [r3, #32]
+  99              		.loc 1 14 19 view .LVU27
+ 100 004c 8021     		movs	r1, #128
+ 101 004e 4901     		lsls	r1, r1, #5
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s 			page 3
+
+
+ 102 0050 2143     		orrs	r1, r4
+ 103 0052 1962     		str	r1, [r3, #32]
+  15:Core/Src/uart.c **** 
+  16:Core/Src/uart.c ****     RCC->APBENR1 |= RCC_APBENR1_USART2EN;
+ 104              		.loc 1 16 5 is_stmt 1 view .LVU28
+ 105              		.loc 1 16 8 is_stmt 0 view .LVU29
+ 106 0054 D16B     		ldr	r1, [r2, #60]
+ 107              		.loc 1 16 18 view .LVU30
+ 108 0056 8023     		movs	r3, #128
+ 109 0058 9B02     		lsls	r3, r3, #10
+ 110 005a 0B43     		orrs	r3, r1
+ 111 005c D363     		str	r3, [r2, #60]
+  17:Core/Src/uart.c ****     USART2->BRR = 417;
+ 112              		.loc 1 17 5 is_stmt 1 view .LVU31
+ 113              		.loc 1 17 17 is_stmt 0 view .LVU32
+ 114 005e 094B     		ldr	r3, .L2+12
+ 115 0060 A222     		movs	r2, #162
+ 116 0062 FF32     		adds	r2, r2, #255
+ 117 0064 DA60     		str	r2, [r3, #12]
+  18:Core/Src/uart.c ****     USART2->CR1 |= USART_CR1_TE;
+ 118              		.loc 1 18 5 is_stmt 1 view .LVU33
+ 119              		.loc 1 18 11 is_stmt 0 view .LVU34
+ 120 0066 1A68     		ldr	r2, [r3]
+ 121              		.loc 1 18 17 view .LVU35
+ 122 0068 0821     		movs	r1, #8
+ 123 006a 0A43     		orrs	r2, r1
+ 124 006c 1A60     		str	r2, [r3]
+  19:Core/Src/uart.c ****     USART2->CR1 |= USART_CR1_UE;
+ 125              		.loc 1 19 5 is_stmt 1 view .LVU36
+ 126              		.loc 1 19 11 is_stmt 0 view .LVU37
+ 127 006e 1A68     		ldr	r2, [r3]
+ 128              		.loc 1 19 17 view .LVU38
+ 129 0070 0243     		orrs	r2, r0
+ 130 0072 1A60     		str	r2, [r3]
+  20:Core/Src/uart.c **** }
+ 131              		.loc 1 20 1 view .LVU39
+ 132              		@ sp needed
+ 133 0074 10BD     		pop	{r4, pc}
+ 134              	.L3:
+ 135 0076 C046     		.align	2
+ 136              	.L2:
+ 137 0078 00100240 		.word	1073876992
+ 138 007c FFF0FFFF 		.word	-3841
+ 139 0080 FF0FFFFF 		.word	-61441
+ 140 0084 00440040 		.word	1073759232
+ 141              		.cfi_endproc
+ 142              	.LFE217:
+ 144              		.section	.text.uart_send_char,"ax",%progbits
+ 145              		.align	1
+ 146              		.global	uart_send_char
+ 147              		.syntax unified
+ 148              		.code	16
+ 149              		.thumb_func
+ 151              	uart_send_char:
+ 152              	.LFB218:
+  21:Core/Src/uart.c **** 
+  22:Core/Src/uart.c **** void uart_send_char(char c)
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s 			page 4
+
+
+  23:Core/Src/uart.c **** {
+ 153              		.loc 1 23 1 is_stmt 1 view -0
+ 154              		.cfi_startproc
+ 155              		@ args = 0, pretend = 0, frame = 0
+ 156              		@ frame_needed = 0, uses_anonymous_args = 0
+ 157              		@ link register save eliminated.
+ 158              	.LVL0:
+ 159              	.L5:
+  24:Core/Src/uart.c ****     while (!(USART2->ISR & USART_ISR_TXE_TXFNF));
+ 160              		.loc 1 24 12 discriminator 1 view .LVU41
+ 161              		.loc 1 24 20 is_stmt 0 discriminator 1 view .LVU42
+ 162 0000 034B     		ldr	r3, .L7
+ 163 0002 DB69     		ldr	r3, [r3, #28]
+ 164              		.loc 1 24 12 discriminator 1 view .LVU43
+ 165 0004 1B06     		lsls	r3, r3, #24
+ 166 0006 FBD5     		bpl	.L5
+  25:Core/Src/uart.c ****     USART2->TDR = c;
+ 167              		.loc 1 25 5 is_stmt 1 view .LVU44
+ 168              		.loc 1 25 17 is_stmt 0 view .LVU45
+ 169 0008 014B     		ldr	r3, .L7
+ 170 000a 9862     		str	r0, [r3, #40]
+  26:Core/Src/uart.c **** }
+ 171              		.loc 1 26 1 view .LVU46
+ 172              		@ sp needed
+ 173 000c 7047     		bx	lr
+ 174              	.L8:
+ 175 000e C046     		.align	2
+ 176              	.L7:
+ 177 0010 00440040 		.word	1073759232
+ 178              		.cfi_endproc
+ 179              	.LFE218:
+ 181              		.section	.text.uart_send_string,"ax",%progbits
+ 182              		.align	1
+ 183              		.global	uart_send_string
+ 184              		.syntax unified
+ 185              		.code	16
+ 186              		.thumb_func
+ 188              	uart_send_string:
+ 189              	.LVL1:
+ 190              	.LFB219:
+  27:Core/Src/uart.c **** 
+  28:Core/Src/uart.c **** void uart_send_string(const char *str)
+  29:Core/Src/uart.c **** {
+ 191              		.loc 1 29 1 is_stmt 1 view -0
+ 192              		.cfi_startproc
+ 193              		@ args = 0, pretend = 0, frame = 0
+ 194              		@ frame_needed = 0, uses_anonymous_args = 0
+ 195              		.loc 1 29 1 is_stmt 0 view .LVU48
+ 196 0000 10B5     		push	{r4, lr}
+ 197              	.LCFI1:
+ 198              		.cfi_def_cfa_offset 8
+ 199              		.cfi_offset 4, -8
+ 200              		.cfi_offset 14, -4
+ 201 0002 0400     		movs	r4, r0
+  30:Core/Src/uart.c ****     while (*str)
+ 202              		.loc 1 30 5 is_stmt 1 view .LVU49
+ 203              		.loc 1 30 11 is_stmt 0 view .LVU50
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s 			page 5
+
+
+ 204 0004 02E0     		b	.L10
+ 205              	.LVL2:
+ 206              	.L11:
+  31:Core/Src/uart.c ****         uart_send_char(*str++);
+ 207              		.loc 1 31 9 is_stmt 1 view .LVU51
+ 208              		.loc 1 31 28 is_stmt 0 view .LVU52
+ 209 0006 0134     		adds	r4, r4, #1
+ 210              	.LVL3:
+ 211              		.loc 1 31 9 view .LVU53
+ 212 0008 FFF7FEFF 		bl	uart_send_char
+ 213              	.LVL4:
+ 214              	.L10:
+  30:Core/Src/uart.c ****     while (*str)
+ 215              		.loc 1 30 12 is_stmt 1 view .LVU54
+ 216 000c 2078     		ldrb	r0, [r4]
+ 217 000e 0028     		cmp	r0, #0
+ 218 0010 F9D1     		bne	.L11
+  32:Core/Src/uart.c **** }
+ 219              		.loc 1 32 1 is_stmt 0 view .LVU55
+ 220              		@ sp needed
+ 221              	.LVL5:
+ 222              		.loc 1 32 1 view .LVU56
+ 223 0012 10BD     		pop	{r4, pc}
+ 224              		.cfi_endproc
+ 225              	.LFE219:
+ 227              		.section	.text._write,"ax",%progbits
+ 228              		.align	1
+ 229              		.global	_write
+ 230              		.syntax unified
+ 231              		.code	16
+ 232              		.thumb_func
+ 234              	_write:
+ 235              	.LVL6:
+ 236              	.LFB220:
+  33:Core/Src/uart.c **** 
+  34:Core/Src/uart.c **** int _write(int file, char *ptr, int len)
+  35:Core/Src/uart.c **** {
+ 237              		.loc 1 35 1 is_stmt 1 view -0
+ 238              		.cfi_startproc
+ 239              		@ args = 0, pretend = 0, frame = 0
+ 240              		@ frame_needed = 0, uses_anonymous_args = 0
+ 241              		.loc 1 35 1 is_stmt 0 view .LVU58
+ 242 0000 70B5     		push	{r4, r5, r6, lr}
+ 243              	.LCFI2:
+ 244              		.cfi_def_cfa_offset 16
+ 245              		.cfi_offset 4, -16
+ 246              		.cfi_offset 5, -12
+ 247              		.cfi_offset 6, -8
+ 248              		.cfi_offset 14, -4
+ 249 0002 0E00     		movs	r6, r1
+ 250 0004 1500     		movs	r5, r2
+  36:Core/Src/uart.c ****     for (int i = 0; i < len; i++)
+ 251              		.loc 1 36 5 is_stmt 1 view .LVU59
+ 252              	.LBB2:
+ 253              		.loc 1 36 10 view .LVU60
+ 254              	.LVL7:
+ 255              		.loc 1 36 14 is_stmt 0 view .LVU61
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s 			page 6
+
+
+ 256 0006 0024     		movs	r4, #0
+ 257              		.loc 1 36 5 view .LVU62
+ 258 0008 03E0     		b	.L13
+ 259              	.LVL8:
+ 260              	.L14:
+  37:Core/Src/uart.c ****         uart_send_char(ptr[i]);
+ 261              		.loc 1 37 9 is_stmt 1 view .LVU63
+ 262 000a 305D     		ldrb	r0, [r6, r4]
+ 263 000c FFF7FEFF 		bl	uart_send_char
+ 264              	.LVL9:
+  36:Core/Src/uart.c ****     for (int i = 0; i < len; i++)
+ 265              		.loc 1 36 31 discriminator 3 view .LVU64
+ 266 0010 0134     		adds	r4, r4, #1
+ 267              	.LVL10:
+ 268              	.L13:
+  36:Core/Src/uart.c ****     for (int i = 0; i < len; i++)
+ 269              		.loc 1 36 23 discriminator 1 view .LVU65
+ 270 0012 AC42     		cmp	r4, r5
+ 271 0014 F9DB     		blt	.L14
+ 272              	.LBE2:
+  38:Core/Src/uart.c ****     return len;
+ 273              		.loc 1 38 5 view .LVU66
+  39:Core/Src/uart.c **** }...
+ 274              		.loc 1 39 1 is_stmt 0 view .LVU67
+ 275 0016 2800     		movs	r0, r5
+ 276              		@ sp needed
+ 277              	.LVL11:
+ 278              	.LVL12:
+ 279              	.LVL13:
+ 280              		.loc 1 39 1 view .LVU68
+ 281 0018 70BD     		pop	{r4, r5, r6, pc}
+ 282              		.cfi_endproc
+ 283              	.LFE220:
+ 285              		.text
+ 286              	.Letext0:
+ 287              		.file 2 "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/arm-none-eabi/include/ma
+ 288              		.file 3 "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/arm-none-eabi/include/sy
+ 289              		.file 4 "Drivers/CMSIS/Device/ST/STM32C0xx/Include/stm32c031xx.h"
+ARM GAS  C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s 			page 7
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 uart.c
+C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s:19     .text.uart_init:00000000 $t
+C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s:25     .text.uart_init:00000000 uart_init
+C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s:137    .text.uart_init:00000078 $d
+C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s:145    .text.uart_send_char:00000000 $t
+C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s:151    .text.uart_send_char:00000000 uart_send_char
+C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s:177    .text.uart_send_char:00000010 $d
+C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s:182    .text.uart_send_string:00000000 $t
+C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s:188    .text.uart_send_string:00000000 uart_send_string
+C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s:228    .text._write:00000000 $t
+C:\Users\amosd\AppData\Local\Temp\cc47CCf7.s:234    .text._write:00000000 _write
+
+NO UNDEFINED SYMBOLS

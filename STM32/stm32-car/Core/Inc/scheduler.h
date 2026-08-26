@@ -18,7 +18,7 @@ typedef struct {
     uint8_t elapsedTime;
 } Scheduler;
 
-void initScheduler(Scheduler *scheduler);
+void startScheduler(Scheduler scheduler);
 void tickScheduler(Scheduler *scheduler);
 
 #endif

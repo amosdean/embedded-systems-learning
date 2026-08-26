@@ -1,5 +1,4 @@
 /*
-/**
   ******************************************************************************
   * @file           : main.c
   * @brief          : Main program body
@@ -12,13 +11,18 @@
 #include "motor.h"
 #include "scheduler.h"
 #include "timer.h"
-
+#include "uart.h"
 
 void SystemClock_Config(void);
 int main(void)
 {
-  
+  HAL_Init();
   SystemClock_Config();
+  uart_init();
+  uart_send_string("uart initialized\r\n");
+char buf[50];
+sprintf(buf, "SystemCoreClock: %lu\r\n", SystemCoreClock);
+uart_send_string(buf);
 
     const Maneuver sequence[] = {
     {FORWARD,  FORWARD,  200, 200, 200},  // straight, 2 sec
@@ -43,9 +47,12 @@ int main(void)
     {
       if (counter >= 1) {
           tickScheduler(&scheduler);
+          // uart_send_string(buf);
+          // uart_send_string("Ticking scheduler\r\n");
           counter = 0;
       }
     }
+
 }
 
 /**
@@ -56,6 +63,34 @@ void SystemClock_Config(void)
 {
   // C031 boots at 48MHz HSI by default
   // no additional configuration needed
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  __HAL_FLASH_SET_LATENCY(FLASH_LATENCY_1);
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
+  RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 

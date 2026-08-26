@@ -37,6 +37,10 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 Core/Src/main.c \
+Core/Src/uart.c \
+Core/Src/motor.c \
+Core/Src/timer.c \
+Core/Src/scheduler.c \
 Core/Src/stm32c0xx_it.c \
 Core/Src/stm32c0xx_hal_msp.c \
 Drivers/BSP/STM32C0xx_Nucleo/stm32c0xx_nucleo.c \
@@ -200,5 +204,11 @@ clean:
 # dependencies
 #######################################
 -include $(wildcard $(BUILD_DIR)/*.d)
+
+########################################
+# flash target
+########################################
+flash:
+	STM32_Programmer_CLI -c port=SWD -w build/$(TARGET).elf -v -rst
 
 # *** EOF ***
