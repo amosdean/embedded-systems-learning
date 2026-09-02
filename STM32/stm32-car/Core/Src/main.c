@@ -19,14 +19,9 @@ int main(void)
   HAL_Init();
   SystemClock_Config();
   uart_init();
-  uart_send_string("uart initialized\r\n");
-char buf[50];
-sprintf(buf, "SystemCoreClock: %lu\r\n", SystemCoreClock);
-uart_send_string(buf);
-
     const Maneuver sequence[] = {
     {FORWARD,  FORWARD,  200, 200, 200},  // straight, 2 sec
-    {BACKWARD,  BACKWARD, 200, 200, 50},   // turn left, 0.5 sec
+    // {BACKWARD,  BACKWARD, 200, 200, 50},   // turn left, 0.5 sec
     // {FORWARD,  FORWARD,  200, 200, 200},  // straight, 2 sec
     // {FORWARD,  BACKWARD, 150, 150, 50},   // turn left, 0.5 sec
     // {FORWARD,  FORWARD,  200, 200, 200},  // straight again

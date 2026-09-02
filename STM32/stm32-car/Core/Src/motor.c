@@ -6,21 +6,16 @@ static uint8_t latchState;
 static const uint8_t DEFAULT_FREQ = 125; // about 50% duty cycle with 64 prescaler
 
 static void txLatch() {
-    uart_send_string("Transmitting latch state\r\n");
-    uart_send_string("Latch state: ");
-    char buf[10];
-    sprintf(buf, "%d\r\n", latchState);
-    uart_send_string(buf);
     MOTORLATCH_LOW;
     MOTORDATA_LOW;
     for(int i = 7; i >= 0; i--) {
         MOTORCLK_LOW;
-        if(latchState & (1 << i))
-            // uart_send_string("Setting bit high\r\n");
+        if(latchState & (1 << i)) {
             MOTORDATA_HIGH;
-        else
-            // uart_send_string("Setting bit low\r\n");
+        }
+        else {
             MOTORDATA_LOW;
+        }
         MOTORCLK_HIGH;
     }
     MOTORLATCH_HIGH;
@@ -109,7 +104,6 @@ void initMotor() {
     MOTORENABLE_PORT->MODER &= ~GPIO_MODER_MODE15_Msk;
     MOTORENABLE_PORT->MODER |= GPIO_MODER_MODE15_0;
     MOTORENABLE_LOW;  // pull low to enable motors
-    // MOTORENABLE_HIGH;  // pull low to enable motors
 
     MOTORLATCH_PORT->MODER &= ~GPIO_MODER_MODE6_Msk;
     MOTORLATCH_PORT->MODER |= GPIO_MODER_MODE6_0;
@@ -143,6 +137,8 @@ void initMotor() {
     }
     txLatch();
     initPWM(DEFAULT_FREQ);
+//     latchState = 0xFF;  // you'll need to make latchState accessible or add a test function
+// txLatch();
 }
 
 
@@ -179,19 +175,16 @@ void run(enum motor_pos pos, uint8_t cmd) {
 
     switch(cmd) {
         case FORWARD:
-            uart_send_string("Running FORWARD\r\n");
             latchState |= (1 << a);
             latchState &= ~(1 << b);
             txLatch();
             break;
         case BACKWARD:
-            uart_send_string("Running BACKWARD\r\n");
             latchState &= ~(1 << a);
             latchState |= (1 << b);
             txLatch();
             break;
         case RELEASE:
-            uart_send_string("Running RELEASE\r\n");
             latchState &= ~(1 << a);
             latchState &= ~(1 << b);
             txLatch();

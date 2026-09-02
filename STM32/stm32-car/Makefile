@@ -198,7 +198,8 @@ $(BUILD_DIR):
 # clean up
 #######################################
 clean:
-	-rm -fR $(BUILD_DIR)
+	rmdir /s /q build
+# 	-rm -fR $(BUILD_DIR)
   
 #######################################
 # dependencies
